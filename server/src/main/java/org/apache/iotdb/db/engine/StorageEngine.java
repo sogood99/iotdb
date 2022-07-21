@@ -54,6 +54,7 @@ import org.apache.iotdb.db.qp.physical.crud.InsertPlan;
 import org.apache.iotdb.db.qp.physical.crud.InsertRowPlan;
 import org.apache.iotdb.db.qp.physical.crud.InsertRowsOfOneDevicePlan;
 import org.apache.iotdb.db.qp.physical.crud.InsertTabletPlan;
+import org.apache.iotdb.db.qp.utils.DatetimeUtils;
 import org.apache.iotdb.db.rescon.SystemInfo;
 import org.apache.iotdb.db.service.IService;
 import org.apache.iotdb.db.service.IoTDB;
@@ -895,6 +896,28 @@ public class StorageEngine implements IService {
     }
 
     processorMap.get(storageGroup).setTTL(dataTTL);
+  }
+
+  /** Creates threads to check on migrations */
+  public void setMigrate(PartialPath storageGroup, File targetDir, long ttl, long startTime) {
+    ScheduledExecutorService migrateThread =
+        IoTDBThreadPoolFactory.newSingleThreadScheduledExecutor("Migrate");
+
+    migrateThread.schedule(
+        () -> checkMigrate(storageGroup, targetDir, ttl),
+        startTime - DatetimeUtils.currentTime(),
+        TimeUnit.MILLISECONDS);
+    logger.info("start migration check thread successfully.");
+  }
+
+  /** Push migrate checking to sg processors */
+  public void checkMigrate(PartialPath storageGroup, File targetDir, long ttl) {
+    // storage group has no data
+    if (!processorMap.containsKey(storageGroup)) {
+      return;
+    }
+
+    processorMap.get(storageGroup).checkMigrate(targetDir, ttl);
   }
 
   public void deleteStorageGroup(PartialPath storageGroupPath) {

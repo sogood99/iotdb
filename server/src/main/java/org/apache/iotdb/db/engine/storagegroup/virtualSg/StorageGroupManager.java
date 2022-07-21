@@ -37,6 +37,7 @@ import org.apache.iotdb.tsfile.utils.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -115,6 +116,16 @@ public class StorageGroupManager {
         this.virtualStorageGroupProcessor) {
       if (virtualStorageGroupProcessor != null) {
         virtualStorageGroupProcessor.checkFilesTTL();
+      }
+    }
+  }
+
+  /** push check migration to all virtual storage group processors */
+  public void checkMigrate(File targetDir, long ttl) {
+    for (VirtualStorageGroupProcessor virtualStorageGroupProcessor :
+        this.virtualStorageGroupProcessor) {
+      if (virtualStorageGroupProcessor != null) {
+        virtualStorageGroupProcessor.checkMigrate(targetDir, ttl);
       }
     }
   }

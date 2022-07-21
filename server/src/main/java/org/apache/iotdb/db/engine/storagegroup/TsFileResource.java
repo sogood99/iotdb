@@ -524,6 +524,27 @@ public class TsFileResource {
     return true;
   }
 
+  /**
+   * Move the data file, remove its resource file, and its modification file physically.
+   *
+   * @return migrated file if no errors, null if errors
+   */
+  public File migrate(File targetDir) {
+    File migratedFile = new File(targetDir, file.getName());
+    fsFactory.moveFile(file, migratedFile);
+
+    if (!removeResourceFile()) {
+      return null;
+    }
+    try {
+      fsFactory.deleteIfExists(fsFactory.getFile(file.getPath() + ModificationFile.FILE_SUFFIX));
+    } catch (IOException e) {
+      LOGGER.error("ModificationFile {} cannot be deleted: {}", file, e.getMessage());
+      return null;
+    }
+    return migratedFile;
+  }
+
   public boolean removeResourceFile() {
     try {
       fsFactory.deleteIfExists(fsFactory.getFile(file.getPath() + RESOURCE_SUFFIX));

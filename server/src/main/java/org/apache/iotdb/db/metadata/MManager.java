@@ -897,6 +897,13 @@ public class MManager {
       logWriter.setTTL(storageGroup, dataTTL);
     }
   }
+
+  public void setMigrate(PartialPath storageGroup, File targetDir, long ttl, long startTime)
+      throws MetadataException, IOException {
+    if (!isRecovering) {
+      logWriter.setMigrate(storageGroup, targetDir, ttl, startTime);
+    }
+  }
   // endregion
 
   // region Interfaces for get and auto create device

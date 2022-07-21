@@ -1521,6 +1521,63 @@ public class VirtualStorageGroupProcessor {
     }
   }
 
+  /** iterate over TsFiles and migrate to targetDir if out of ttl */
+  public void checkMigrate(File targetDir, long ttl) {
+    if (dataTTL == Long.MAX_VALUE) {
+      logger.debug(
+          "{}: TTL not set, ignore the check",
+          logicalStorageGroupName + "-" + virtualStorageGroupId);
+      return;
+    }
+    long ttlLowerBound = System.currentTimeMillis() - ttl;
+    logger.debug(
+        "{}: TTL removing files before {}",
+        logicalStorageGroupName + "-" + virtualStorageGroupId,
+        new Date(ttlLowerBound));
+
+    // copy to avoid concurrent modification of deletion
+    List<TsFileResource> seqFiles = new ArrayList<>(tsFileManager.getTsFileList(true));
+    List<TsFileResource> unseqFiles = new ArrayList<>(tsFileManager.getTsFileList(false));
+
+    for (TsFileResource tsFileResource : seqFiles) {
+      checkMigrateFile(tsFileResource, targetDir, ttlLowerBound, true);
+    }
+    for (TsFileResource tsFileResource : unseqFiles) {
+      checkMigrateFile(tsFileResource, targetDir, ttlLowerBound, false);
+    }
+  }
+
+  /** migrate the file to targetDir */
+  public void checkMigrateFile(
+      TsFileResource resource, File targetDir, long ttlLowerBound, boolean isSeq) {
+    writeLock("checkMigrationLock");
+    try {
+      if (!resource.isClosed() || !resource.isDeleted() && resource.stillLives(ttlLowerBound)) {
+        return;
+      }
+
+      resource.setStatus(TsFileResourceStatus.MIGRATED);
+
+      // ensure that the file is not used by any queries
+      if (resource.tryWriteLock()) {
+        try {
+          // try to migrate physical data file
+          File migratedFile = resource.migrate(targetDir);
+          tsFileManager.remove(resource, isSeq);
+          logger.info(
+              "Migrated a file {} to {} before {}",
+              resource.getTsFilePath(),
+              migratedFile.getAbsolutePath(),
+              new Date(ttlLowerBound));
+        } finally {
+          resource.writeUnlock();
+        }
+      }
+    } finally {
+      writeUnlock();
+    }
+  }
+
   public void timedFlushSeqMemTable() {
     writeLock("timedFlushSeqMemTable");
     try {

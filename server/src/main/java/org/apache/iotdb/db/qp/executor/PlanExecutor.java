@@ -106,6 +106,7 @@ import org.apache.iotdb.db.qp.physical.sys.KillQueryPlan;
 import org.apache.iotdb.db.qp.physical.sys.LoadConfigurationPlan;
 import org.apache.iotdb.db.qp.physical.sys.OperateFilePlan;
 import org.apache.iotdb.db.qp.physical.sys.PruneTemplatePlan;
+import org.apache.iotdb.db.qp.physical.sys.SetMigratePlan;
 import org.apache.iotdb.db.qp.physical.sys.SetStorageGroupPlan;
 import org.apache.iotdb.db.qp.physical.sys.SetSystemModePlan;
 import org.apache.iotdb.db.qp.physical.sys.SetTTLPlan;
@@ -404,6 +405,9 @@ public class PlanExecutor implements IPlanExecutor {
         return true;
       case SHOW_QUERY_RESOURCE:
         return processShowQueryResource();
+      case MIGRATE:
+        operateMigrate((SetMigratePlan) plan);
+        return true;
       default:
         throw new UnsupportedOperationException(
             String.format("operation %s is not supported", plan.getOperatorName()));
@@ -1521,6 +1525,23 @@ public class PlanExecutor implements IPlanExecutor {
       for (PartialPath storagePath : storageGroupPaths) {
         IoTDB.metaManager.setTTL(storagePath, plan.getDataTTL());
         StorageEngine.getInstance().setTTL(storagePath, plan.getDataTTL());
+      }
+    } catch (MetadataException e) {
+      throw new QueryProcessException(e);
+    } catch (IOException e) {
+      throw new QueryProcessException(e.getMessage());
+    }
+  }
+
+  private void operateMigrate(SetMigratePlan plan) throws QueryProcessException {
+    try {
+      List<PartialPath> storageGroupPaths =
+          IoTDB.metaManager.getMatchedStorageGroups(plan.getStorageGroup(), plan.isPrefixMatch());
+      for (PartialPath storagePath : storageGroupPaths) {
+        IoTDB.metaManager.setMigrate(
+            storagePath, plan.getTargetDir(), plan.getDataTTL(), plan.getStartTime());
+        StorageEngine.getInstance()
+            .setMigrate(storagePath, plan.getTargetDir(), plan.getDataTTL(), plan.getStartTime());
       }
     } catch (MetadataException e) {
       throw new QueryProcessException(e);

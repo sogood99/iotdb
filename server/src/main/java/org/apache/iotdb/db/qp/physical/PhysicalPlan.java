@@ -557,7 +557,8 @@ public abstract class PhysicalPlan {
     UNSET_TEMPLATE,
     APPEND_TEMPLATE,
     PRUNE_TEMPLATE,
-    DROP_TEMPLATE
+    DROP_TEMPLATE,
+    MIGRATE
   }
 
   public long getIndex() {
