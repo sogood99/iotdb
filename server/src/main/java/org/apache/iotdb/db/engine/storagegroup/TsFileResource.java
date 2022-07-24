@@ -530,7 +530,7 @@ public class TsFileResource {
    * @return migrated file if no errors, null if errors
    */
   public File migrate(File targetDir) {
-    File migratedFile = new File(targetDir, file.getName());
+    File migratedFile = fsFactory.getFile(targetDir, file.getName());
     fsFactory.moveFile(file, migratedFile);
 
     if (!removeResourceFile()) {

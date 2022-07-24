@@ -922,7 +922,6 @@ public class StorageEngine implements IService {
     for (MigrateTask task : migrateTaskList) {
       if (task.getStartTime() - DatetimeUtils.currentTime() <= 0
           && task.getState() == MigrateTask.MigrateTaskState.READY) {
-        migrateTasks.remove(task);
 
         // storage group has no data
         if (!processorMap.containsKey(task.getStorageGroup())) {
@@ -932,6 +931,9 @@ public class StorageEngine implements IService {
         // push check migration to storageGroupManager
         processorMap.get(task.getStorageGroup()).checkMigrate(task.getTargetDir(), task.getTTL());
         logger.info("check migration task successfully.");
+
+        // set state and remove
+        migrateTasks.remove(task);
       }
     }
   }
@@ -1053,9 +1055,7 @@ public class StorageEngine implements IService {
     }
   }
 
-  /**
-   * @return TsFiles (seq or unseq) grouped by their storage group and partition number.
-   */
+  /** @return TsFiles (seq or unseq) grouped by their storage group and partition number. */
   public Map<PartialPath, Map<Long, List<TsFileResource>>> getAllClosedStorageGroupTsFile() {
     Map<PartialPath, Map<Long, List<TsFileResource>>> ret = new HashMap<>();
     for (Entry<PartialPath, StorageGroupManager> entry : processorMap.entrySet()) {
@@ -1160,9 +1160,7 @@ public class StorageEngine implements IService {
     list.forEach(VirtualStorageGroupProcessor::readUnlock);
   }
 
-  /**
-   * @return virtual storage group name, like root.sg1/0
-   */
+  /** @return virtual storage group name, like root.sg1/0 */
   public String getStorageGroupPath(PartialPath path) throws StorageEngineException {
     PartialPath deviceId = path.getDevicePath();
     VirtualStorageGroupProcessor storageGroupProcessor = getProcessor(deviceId);

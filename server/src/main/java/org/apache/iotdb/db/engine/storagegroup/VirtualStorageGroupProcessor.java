@@ -1562,8 +1562,8 @@ public class VirtualStorageGroupProcessor {
       if (resource.tryWriteLock()) {
         try {
           // try to migrate physical data file
-          File migratedFile = resource.migrate(targetDir);
           tsFileManager.remove(resource, isSeq);
+          File migratedFile = resource.migrate(targetDir);
           logger.info(
               "Migrated a file {} to {} before {}",
               resource.getTsFilePath(),

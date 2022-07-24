@@ -83,6 +83,7 @@ public class MigrateTask {
     RUNNING,
     PAUSED,
     CANCELING,
-    ERROR
+    ERROR,
+    FINISHED
   }
 }
