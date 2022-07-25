@@ -45,7 +45,7 @@ ddlStatement
     | showFunctions | showTriggers | showContinuousQueries | showTTL | showAllTTL
     | showSchemaTemplates | showNodesInSchemaTemplate
     | showPathsUsingSchemaTemplate | showPathsSetSchemaTemplate
-    | countStorageGroup | countDevices | countTimeseries | countNodes
+    | countStorageGroup | countDevices | countTimeseries | countNodes | setMigrate
     ;
 
 dmlStatement
@@ -323,6 +323,11 @@ countTimeseries
 // Count Nodes
 countNodes
     : COUNT NODES prefixPath LEVEL OPERATOR_EQ INTEGER_LITERAL
+    ;
+
+// Set Migrate
+setMigrate
+    : SET MIGRATE TO path=prefixPath startTime=DATETIME_LITERAL ttl=INTEGER_LITERAL targetDir=STRING_LITERAL
     ;
 
 

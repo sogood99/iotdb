@@ -22,6 +22,7 @@ import org.apache.iotdb.db.conf.IoTDBConstant;
 import org.apache.iotdb.db.conf.IoTDBDescriptor;
 import org.apache.iotdb.db.engine.trigger.executor.TriggerEvent;
 import org.apache.iotdb.db.exception.metadata.IllegalPathException;
+import org.apache.iotdb.db.exception.query.LogicalOperatorException;
 import org.apache.iotdb.db.exception.query.QueryProcessException;
 import org.apache.iotdb.db.exception.runtime.SQLParserException;
 import org.apache.iotdb.db.index.common.IndexType;
@@ -105,6 +106,8 @@ import org.apache.iotdb.tsfile.common.constant.TsFileConstant;
 import org.apache.iotdb.tsfile.file.metadata.enums.CompressionType;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSEncoding;
+import org.apache.iotdb.tsfile.fileSystem.FSFactoryProducer;
+import org.apache.iotdb.tsfile.fileSystem.fsFactory.FSFactory;
 import org.apache.iotdb.tsfile.utils.Pair;
 import org.apache.iotdb.tsfile.utils.StringContainer;
 
@@ -751,6 +754,33 @@ public class IoTDBSqlVisitor extends IoTDBSqlParserBaseVisitor<Operator> {
     operator.setStorageGroup(parsePrefixPath(ctx.prefixPath()));
     return operator;
   }
+
+  // Set Migrate
+  @Override
+  public Operator visitSetMigrate(IoTDBSqlParser.SetMigrateContext ctx) {
+    SetMigrateOperator operator = new SetMigrateOperator(SQLConstant.TOK_SET);
+    operator.setStorageGroup(parsePrefixPath(ctx.path));
+    operator.setTTL(Long.parseLong(ctx.ttl.getText()));
+    try {
+      operator.setStartTime(
+          DatetimeUtils.convertDatetimeStrToLong(ctx.startTime.getText(), zoneId));
+    } catch (LogicalOperatorException e) {
+      throw new SQLParserException("unknown start time");
+    }
+
+    FSFactory fsFactory = FSFactoryProducer.getFSFactory();
+    File targetDir = fsFactory.getFile(parseStringLiteral(ctx.targetDir.getText()));
+    if (!targetDir.exists()) {
+      throw new SQLParserException("unknown directory");
+    } else if (!targetDir.isDirectory()) {
+      throw new SQLParserException("not a directory");
+    }
+    operator.setTargetDir(targetDir);
+    operator.setStartTime(Long.parseLong(ctx.ttl.getText()));
+    return operator;
+  }
+
+  // Show Migrate
 
   // Set Schema Template
   @Override

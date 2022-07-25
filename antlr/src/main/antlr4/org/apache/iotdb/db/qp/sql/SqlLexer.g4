@@ -322,6 +322,10 @@ METADATA
     : M E T A D A T A
     ;
 
+MIGRATE
+    : M I G R A T E
+    ;
+
 NODES
     : N O D E S
     ;
