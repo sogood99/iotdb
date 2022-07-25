@@ -908,6 +908,11 @@ public class StorageEngine implements IService {
     processorMap.get(storageGroup).setTTL(dataTTL);
   }
 
+  /** creates a copy of migrateTasks and returns */
+  public List<MigrateTask> getMigrateTasks() {
+    return new ArrayList<>(migrateTasks);
+  }
+
   /** add migration task to migrationTasks for thread to check */
   public void setMigrate(PartialPath storageGroup, File targetDir, long ttl, long startTime) {
     migrateTasks.add(new MigrateTask(storageGroup, targetDir, ttl, startTime));
@@ -917,11 +922,11 @@ public class StorageEngine implements IService {
   /** check if any of the migrateTasks can start */
   public void checkMigrate() {
     // copy migrateTasks to allow deletion
-    List<MigrateTask> migrateTaskList = new ArrayList<>(migrateTasks);
+    List<MigrateTask> migrateTaskList = getMigrateTasks();
 
     for (MigrateTask task : migrateTaskList) {
       if (task.getStartTime() - DatetimeUtils.currentTime() <= 0
-          && task.getState() == MigrateTask.MigrateTaskState.READY) {
+          && task.getStatus() == MigrateTask.MigrateTaskStatus.READY) {
 
         // storage group has no data
         if (!processorMap.containsKey(task.getStorageGroup())) {
