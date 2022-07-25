@@ -1606,8 +1606,6 @@ public class PlanExecutor implements IPlanExecutor {
       List<PartialPath> storageGroupPaths =
           IoTDB.metaManager.getMatchedStorageGroups(plan.getStorageGroup(), plan.isPrefixMatch());
       for (PartialPath storagePath : storageGroupPaths) {
-        IoTDB.metaManager.setMigrate(
-            storagePath, plan.getTargetDir(), plan.getTTL(), plan.getStartTime());
         StorageEngine.getInstance()
             .setMigrate(storagePath, plan.getTargetDir(), plan.getTTL(), plan.getStartTime());
       }

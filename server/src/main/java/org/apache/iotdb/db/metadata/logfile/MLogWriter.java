@@ -40,7 +40,6 @@ import org.apache.iotdb.db.qp.physical.sys.DropTemplatePlan;
 import org.apache.iotdb.db.qp.physical.sys.MNodePlan;
 import org.apache.iotdb.db.qp.physical.sys.MeasurementMNodePlan;
 import org.apache.iotdb.db.qp.physical.sys.PruneTemplatePlan;
-import org.apache.iotdb.db.qp.physical.sys.SetMigratePlan;
 import org.apache.iotdb.db.qp.physical.sys.SetStorageGroupPlan;
 import org.apache.iotdb.db.qp.physical.sys.SetTTLPlan;
 import org.apache.iotdb.db.qp.physical.sys.SetTemplatePlan;
@@ -147,12 +146,6 @@ public class MLogWriter implements AutoCloseable {
 
   public void setTTL(PartialPath storageGroup, long ttl) throws IOException {
     SetTTLPlan plan = new SetTTLPlan(storageGroup, ttl);
-    putLog(plan);
-  }
-
-  public void setMigrate(PartialPath storageGroup, File targetDir, long ttl, long startTime)
-      throws IOException {
-    SetMigratePlan plan = new SetMigratePlan(storageGroup, targetDir, ttl, startTime);
     putLog(plan);
   }
 
