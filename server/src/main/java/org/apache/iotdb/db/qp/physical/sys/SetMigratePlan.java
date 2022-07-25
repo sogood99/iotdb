@@ -35,19 +35,19 @@ public class SetMigratePlan extends PhysicalPlan {
 
   private PartialPath storageGroup;
   private File targetDir;
-  private long dataTTL;
+  private long ttl;
   private long startTime;
 
   public SetMigratePlan() {
     super(OperatorType.MIGRATE);
   }
 
-  public SetMigratePlan(PartialPath storageGroup, File targetDir, long dataTTL, long startTime) {
+  public SetMigratePlan(PartialPath storageGroup, File targetDir, long ttl, long startTime) {
     // set migrate
     super(OperatorType.MIGRATE);
     this.storageGroup = storageGroup;
     this.targetDir = targetDir;
-    this.dataTTL = dataTTL;
+    this.ttl = ttl;
     this.startTime = startTime;
   }
 
@@ -65,7 +65,7 @@ public class SetMigratePlan extends PhysicalPlan {
   public void serialize(DataOutputStream stream) throws IOException {
     int type = PhysicalPlanType.MIGRATE.ordinal();
     stream.writeByte((byte) type);
-    stream.writeLong(dataTTL);
+    stream.writeLong(ttl);
     stream.writeLong(startTime);
     putString(stream, storageGroup.getFullPath());
     putString(stream, targetDir.getAbsolutePath());
@@ -77,7 +77,7 @@ public class SetMigratePlan extends PhysicalPlan {
   public void serializeImpl(ByteBuffer buffer) {
     int type = PhysicalPlanType.TTL.ordinal();
     buffer.put((byte) type);
-    buffer.putLong(dataTTL);
+    buffer.putLong(ttl);
     buffer.putLong(startTime);
     putString(buffer, storageGroup.getFullPath());
     putString(buffer, targetDir.getAbsolutePath());
@@ -87,7 +87,7 @@ public class SetMigratePlan extends PhysicalPlan {
 
   @Override
   public void deserialize(ByteBuffer buffer) throws IllegalPathException {
-    this.dataTTL = buffer.getLong();
+    this.ttl = buffer.getLong();
     this.startTime = buffer.getLong();
     this.storageGroup = new PartialPath(readString(buffer));
     this.targetDir = new File(readString(buffer));
@@ -111,12 +111,12 @@ public class SetMigratePlan extends PhysicalPlan {
     this.targetDir = targetDir;
   }
 
-  public long getDataTTL() {
-    return dataTTL;
+  public long getTTL() {
+    return ttl;
   }
 
-  public void setDataTTL(long dataTTL) {
-    this.dataTTL = dataTTL;
+  public void setTTL(long ttl) {
+    this.ttl = ttl;
   }
 
   public long getStartTime() {
