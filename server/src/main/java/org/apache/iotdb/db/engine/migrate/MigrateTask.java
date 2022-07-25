@@ -27,7 +27,7 @@ public class MigrateTask {
   private File targetDir = null;
   private long startTime = Long.MAX_VALUE;
   private long ttl = Long.MAX_VALUE;
-  private MigrateTaskState state = MigrateTaskState.READY;
+  private MigrateTaskStatus status = MigrateTaskStatus.READY;
 
   public MigrateTask(PartialPath storageGroup, File targetDir, long ttl, long startTime) {
     this.storageGroup = storageGroup;
@@ -54,8 +54,8 @@ public class MigrateTask {
     return startTime;
   }
 
-  public MigrateTaskState getState() {
-    return state;
+  public MigrateTaskStatus getStatus() {
+    return status;
   }
 
   public void setStorageGroup(PartialPath storageGroup) {
@@ -74,11 +74,11 @@ public class MigrateTask {
     this.startTime = startTime;
   }
 
-  public void setState(MigrateTaskState state) {
-    this.state = state;
+  public void setStatus(MigrateTaskStatus status) {
+    this.status = status;
   }
 
-  public enum MigrateTaskState {
+  public enum MigrateTaskStatus {
     READY,
     RUNNING,
     PAUSED,
