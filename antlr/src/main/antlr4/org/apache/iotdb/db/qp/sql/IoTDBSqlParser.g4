@@ -46,6 +46,7 @@ ddlStatement
     | showSchemaTemplates | showNodesInSchemaTemplate
     | showPathsUsingSchemaTemplate | showPathsSetSchemaTemplate
     | countStorageGroup | countDevices | countTimeseries | countNodes | setMigrate
+    | showMigrate | showAllMigrate
     ;
 
 dmlStatement
@@ -327,9 +328,18 @@ countNodes
 
 // Set Migrate
 setMigrate
-    : SET MIGRATE TO path=prefixPath startTime=DATETIME_LITERAL ttl=INTEGER_LITERAL targetDir=STRING_LITERAL
+    : SET MIGRATION TO path=prefixPath startTime=DATETIME_LITERAL ttl=INTEGER_LITERAL targetDir=STRING_LITERAL
     ;
 
+// Show Migrate
+showMigrate
+    : SHOW MIGRATION ON prefixPath (COMMA prefixPath)*
+    ;
+
+// Show All Migrate
+showAllMigrate
+    : SHOW ALL MIGRATION
+    ;
 
 /**
  * 3. Data Manipulation Language (DML)

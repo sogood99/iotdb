@@ -781,6 +781,22 @@ public class IoTDBSqlVisitor extends IoTDBSqlParserBaseVisitor<Operator> {
   }
 
   // Show Migrate
+  @Override
+  public Operator visitShowMigrate(IoTDBSqlParser.ShowMigrateContext ctx) {
+    List<PartialPath> storageGroups = new ArrayList<>();
+    List<IoTDBSqlParser.PrefixPathContext> prefixPathList = ctx.prefixPath();
+    for (IoTDBSqlParser.PrefixPathContext prefixPath : prefixPathList) {
+      storageGroups.add(parsePrefixPath(prefixPath));
+    }
+    return new ShowMigrateOperator(storageGroups);
+  }
+
+  // Show All Migrate
+  @Override
+  public Operator visitShowAllMigrate(IoTDBSqlParser.ShowAllMigrateContext ctx) {
+    List<PartialPath> storageGroups = new ArrayList<>();
+    return new ShowMigrateOperator(storageGroups);
+  }
 
   // Set Schema Template
   @Override
