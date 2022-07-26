@@ -924,7 +924,9 @@ public class StorageEngine implements IService {
     // copy migrateTasks to allow deletion
     List<MigrateTask> migrateTaskList = getMigrateTasks();
 
-    for (MigrateTask task : migrateTaskList) {
+    for (int i = 0; i < migrateTaskList.size(); i++) {
+      MigrateTask task = migrateTaskList.get(i);
+
       if (task.getStartTime() - DatetimeUtils.currentTime() <= 0
           && task.getStatus() == MigrateTask.MigrateTaskStatus.READY) {
 
@@ -932,6 +934,9 @@ public class StorageEngine implements IService {
         if (!processorMap.containsKey(task.getStorageGroup())) {
           return;
         }
+
+        // set task to migrating
+        migrateTasks.get(i).setStatus(MigrateTask.MigrateTaskStatus.RUNNING);
 
         // push check migration to storageGroupManager
         processorMap.get(task.getStorageGroup()).checkMigrate(task.getTargetDir(), task.getTTL());
@@ -1060,7 +1065,9 @@ public class StorageEngine implements IService {
     }
   }
 
-  /** @return TsFiles (seq or unseq) grouped by their storage group and partition number. */
+  /**
+   * @return TsFiles (seq or unseq) grouped by their storage group and partition number.
+   */
   public Map<PartialPath, Map<Long, List<TsFileResource>>> getAllClosedStorageGroupTsFile() {
     Map<PartialPath, Map<Long, List<TsFileResource>>> ret = new HashMap<>();
     for (Entry<PartialPath, StorageGroupManager> entry : processorMap.entrySet()) {
@@ -1165,7 +1172,9 @@ public class StorageEngine implements IService {
     list.forEach(VirtualStorageGroupProcessor::readUnlock);
   }
 
-  /** @return virtual storage group name, like root.sg1/0 */
+  /**
+   * @return virtual storage group name, like root.sg1/0
+   */
   public String getStorageGroupPath(PartialPath path) throws StorageEngineException {
     PartialPath deviceId = path.getDevicePath();
     VirtualStorageGroupProcessor storageGroupProcessor = getProcessor(deviceId);
