@@ -207,6 +207,7 @@ import static org.apache.iotdb.db.conf.IoTDBConstant.COLUMN_CONTINUOUS_QUERY_QUE
 import static org.apache.iotdb.db.conf.IoTDBConstant.COLUMN_CONTINUOUS_QUERY_TARGET_PATH;
 import static org.apache.iotdb.db.conf.IoTDBConstant.COLUMN_COUNT;
 import static org.apache.iotdb.db.conf.IoTDBConstant.COLUMN_DEVICES;
+import static org.apache.iotdb.db.conf.IoTDBConstant.COLUMN_EXPIRE_TIME;
 import static org.apache.iotdb.db.conf.IoTDBConstant.COLUMN_FUNCTION_CLASS;
 import static org.apache.iotdb.db.conf.IoTDBConstant.COLUMN_FUNCTION_NAME;
 import static org.apache.iotdb.db.conf.IoTDBConstant.COLUMN_FUNCTION_TYPE;
@@ -1212,7 +1213,7 @@ public class PlanExecutor implements IPlanExecutor {
                 new PartialPath(COLUMN_STORAGE_GROUP, false),
                 new PartialPath(COLUMN_MIGRATE_STATUS, false),
                 new PartialPath(COLUMN_MIGRATE_START_TIME, false),
-                new PartialPath(COLUMN_TTL, false),
+                new PartialPath(COLUMN_EXPIRE_TIME, false),
                 new PartialPath(COLUMN_MIGRATE_TARGET_DIRECTORY, false)),
             Arrays.asList(
                 TSDataType.TEXT,
@@ -1247,7 +1248,7 @@ public class PlanExecutor implements IPlanExecutor {
       if (task.getStartTime() != Long.MAX_VALUE) {
         ZonedDateTime startDate =
             DatetimeUtils.convertMillsecondToZonedDateTime(task.getStartTime());
-        String startTimeStr = DatetimeUtils.formatter.format(startDate);
+        String startTimeStr = DatetimeUtils.ISO_OFFSET_DATE_TIME_WITH_MS.format(startDate);
         startTime = new Field(TSDataType.TEXT);
         startTime.setBinaryV(new Binary(startTimeStr));
       } else {

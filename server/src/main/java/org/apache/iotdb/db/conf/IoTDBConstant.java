@@ -94,6 +94,7 @@ public class IoTDBConstant {
   public static final String COLUMN_MIGRATE_START_TIME = "start time";
   public static final String COLUMN_MIGRATE_STATUS = "status";
   public static final String COLUMN_MIGRATE_TARGET_DIRECTORY = "target directory";
+  public static final String COLUMN_EXPIRE_TIME = "expire time(ms)";
 
   public static final String COLUMN_TASK_NAME = "task name";
   public static final String COLUMN_CREATED_TIME = "created time";

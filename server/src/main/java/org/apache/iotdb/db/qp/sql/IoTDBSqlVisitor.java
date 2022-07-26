@@ -761,12 +761,7 @@ public class IoTDBSqlVisitor extends IoTDBSqlParserBaseVisitor<Operator> {
     SetMigrateOperator operator = new SetMigrateOperator(SQLConstant.TOK_SET);
     operator.setStorageGroup(parsePrefixPath(ctx.path));
     operator.setTTL(Long.parseLong(ctx.ttl.getText()));
-    try {
-      operator.setStartTime(
-          DatetimeUtils.convertDatetimeStrToLong(ctx.startTime.getText(), zoneId));
-    } catch (LogicalOperatorException e) {
-      throw new SQLParserException("unknown start time");
-    }
+    operator.setStartTime(parseDateFormat(ctx.startTime.getText()));
 
     FSFactory fsFactory = FSFactoryProducer.getFSFactory();
     File targetDir = fsFactory.getFile(parseStringLiteral(ctx.targetDir.getText()));
@@ -776,7 +771,6 @@ public class IoTDBSqlVisitor extends IoTDBSqlParserBaseVisitor<Operator> {
       throw new SQLParserException("not a directory");
     }
     operator.setTargetDir(targetDir);
-    operator.setStartTime(Long.parseLong(ctx.ttl.getText()));
     return operator;
   }
 
