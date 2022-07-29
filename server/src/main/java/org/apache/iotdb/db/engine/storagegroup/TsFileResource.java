@@ -654,9 +654,7 @@ public class TsFileResource {
     return timeIndex.checkDeviceIdExist(deviceId);
   }
 
-  /**
-   * @return true if the device is contained in the TsFile and it lives beyond TTL
-   */
+  /** @return true if the device is contained in the TsFile and it lives beyond TTL */
   public boolean isSatisfied(
       String deviceId, Filter timeFilter, boolean isSeq, long ttl, boolean debug) {
     if (deviceId == null) {
@@ -692,9 +690,7 @@ public class TsFileResource {
     return true;
   }
 
-  /**
-   * @return true if the TsFile lives beyond TTL
-   */
+  /** @return true if the TsFile lives beyond TTL */
   private boolean isSatisfied(Filter timeFilter, boolean isSeq, long ttl, boolean debug) {
     long startTime = getFileStartTime();
     long endTime = isClosed() || !isSeq ? getFileEndTime() : Long.MAX_VALUE;
@@ -716,9 +712,7 @@ public class TsFileResource {
     return true;
   }
 
-  /**
-   * @return true if the device is contained in the TsFile
-   */
+  /** @return true if the device is contained in the TsFile */
   public boolean isSatisfied(
       String deviceId, Filter timeFilter, TsFileFilter fileFilter, boolean isSeq, boolean debug) {
     if (fileFilter != null && fileFilter.fileNotSatisfy(this)) {
@@ -751,9 +745,7 @@ public class TsFileResource {
     return true;
   }
 
-  /**
-   * @return whether the given time falls in ttl
-   */
+  /** @return whether the given time falls in ttl */
   private boolean isAlive(long time, long dataTTL) {
     return dataTTL == Long.MAX_VALUE || (System.currentTimeMillis() - time) <= dataTTL;
   }
@@ -868,9 +860,7 @@ public class TsFileResource {
     this.modFile = modFile;
   }
 
-  /**
-   * @return resource map size
-   */
+  /** @return resource map size */
   public long calculateRamSize() {
     ramSize = timeIndex.calculateRamSize();
     return ramSize;
@@ -1028,9 +1018,7 @@ public class TsFileResource {
     }
   }
 
-  /**
-   * @return is this tsfile resource in a TsFileResourceList
-   */
+  /** @return is this tsfile resource in a TsFileResourceList */
   public boolean isFileInList() {
     return prev != null || next != null;
   }

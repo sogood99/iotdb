@@ -46,9 +46,7 @@ public class MigrateLogReader implements AutoCloseable {
     logFileInStream = new FileInputStream(logFile);
   }
 
-  /**
-   * @return MigrateLog from log file, null if nothing left in file
-   */
+  /** @return MigrateLog from log file, null if nothing left in file */
   private MigrateLogWriter.MigrateLog readLog() throws IOException, IllegalPathException {
     if (logFileInStream.available() == 0) {
       return null;
