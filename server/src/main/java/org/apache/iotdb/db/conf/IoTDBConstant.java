@@ -91,6 +91,7 @@ public class IoTDBConstant {
   public static final String COLUMN_LOCK_INFO = "lock holder";
   public static final String COLUMN_TTL = "ttl";
 
+  public static final String COLUMN_INDEX = "index";
   public static final String COLUMN_MIGRATE_START_TIME = "start time";
   public static final String COLUMN_MIGRATE_STATUS = "status";
   public static final String COLUMN_MIGRATE_TARGET_DIRECTORY = "target directory";

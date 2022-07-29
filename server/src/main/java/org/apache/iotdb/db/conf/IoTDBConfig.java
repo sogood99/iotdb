@@ -683,6 +683,9 @@ public class IoTDBConfig {
    */
   private long defaultTTL = Long.MAX_VALUE;
 
+  /** number of threads given to migrate tasks */
+  private int migrateThreadCount = 1;
+
   /** The default value of primitive array size in array pool */
   private int primitiveArraySize = 32;
 
@@ -2098,6 +2101,14 @@ public class IoTDBConfig {
 
   public void setDefaultTTL(long defaultTTL) {
     this.defaultTTL = defaultTTL;
+  }
+
+  public int getMigrateThreadCount() {
+    return migrateThreadCount;
+  }
+
+  public void setMigrateThreadCount(int migrateThreadCount) {
+    this.migrateThreadCount = migrateThreadCount;
   }
 
   public int getThriftServerAwaitTimeForStopService() {

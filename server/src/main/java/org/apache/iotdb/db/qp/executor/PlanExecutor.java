@@ -211,6 +211,7 @@ import static org.apache.iotdb.db.conf.IoTDBConstant.COLUMN_EXPIRE_TIME;
 import static org.apache.iotdb.db.conf.IoTDBConstant.COLUMN_FUNCTION_CLASS;
 import static org.apache.iotdb.db.conf.IoTDBConstant.COLUMN_FUNCTION_NAME;
 import static org.apache.iotdb.db.conf.IoTDBConstant.COLUMN_FUNCTION_TYPE;
+import static org.apache.iotdb.db.conf.IoTDBConstant.COLUMN_INDEX;
 import static org.apache.iotdb.db.conf.IoTDBConstant.COLUMN_ITEM;
 import static org.apache.iotdb.db.conf.IoTDBConstant.COLUMN_LOCK_INFO;
 import static org.apache.iotdb.db.conf.IoTDBConstant.COLUMN_MIGRATE_START_TIME;
@@ -1210,12 +1211,14 @@ public class PlanExecutor implements IPlanExecutor {
     ListDataSet listDataSet =
         new ListDataSet(
             Arrays.asList(
+                new PartialPath(COLUMN_INDEX, false),
                 new PartialPath(COLUMN_STORAGE_GROUP, false),
                 new PartialPath(COLUMN_MIGRATE_STATUS, false),
                 new PartialPath(COLUMN_MIGRATE_START_TIME, false),
                 new PartialPath(COLUMN_EXPIRE_TIME, false),
                 new PartialPath(COLUMN_MIGRATE_TARGET_DIRECTORY, false)),
             Arrays.asList(
+                TSDataType.INT64,
                 TSDataType.TEXT,
                 TSDataType.TEXT,
                 TSDataType.TEXT,
@@ -1223,7 +1226,8 @@ public class PlanExecutor implements IPlanExecutor {
                 TSDataType.TEXT));
     Set<PartialPath> selectedSgs = new HashSet<>(showMigratePlan.getStorageGroups());
 
-    List<MigrateTask> migrateTaskList = StorageEngine.getInstance().getMigrateTasks();
+    List<MigrateTask> migrateTaskList =
+        StorageEngine.getInstance().getMigrateManager().getMigrateTasks();
     int timestamp = 0;
     for (MigrateTask task : migrateTaskList) {
       PartialPath sgName = task.getStorageGroup();
@@ -1231,11 +1235,15 @@ public class PlanExecutor implements IPlanExecutor {
         continue;
       }
       RowRecord rowRecord = new RowRecord(timestamp++);
+      Field index = new Field(TSDataType.INT64);
       Field sg = new Field(TSDataType.TEXT);
       Field status = new Field(TSDataType.TEXT);
       Field startTime;
       Field ttl;
       Field targetDir = new Field(TSDataType.TEXT);
+
+      // set values for Fields based on tasks
+      index.setLongV(task.getIndex());
       sg.setBinaryV(new Binary(sgName.getFullPath()));
       status.setBinaryV(new Binary(task.getStatus().name()));
       targetDir.setBinaryV(new Binary(task.getTargetDir().getPath()));
@@ -1254,6 +1262,9 @@ public class PlanExecutor implements IPlanExecutor {
       } else {
         startTime = null;
       }
+
+      // add to rowRecord
+      rowRecord.addField(index);
       rowRecord.addField(sg);
       rowRecord.addField(status);
       rowRecord.addField(startTime);

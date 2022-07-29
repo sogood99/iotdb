@@ -28,7 +28,7 @@ import org.apache.iotdb.db.engine.flush.CloseFileListener;
 import org.apache.iotdb.db.engine.flush.FlushListener;
 import org.apache.iotdb.db.engine.flush.TsFileFlushPolicy;
 import org.apache.iotdb.db.engine.flush.TsFileFlushPolicy.DirectFlushPolicy;
-import org.apache.iotdb.db.engine.migrate.MigrateTask;
+import org.apache.iotdb.db.engine.migrate.MigrateManager;
 import org.apache.iotdb.db.engine.storagegroup.TsFileProcessor;
 import org.apache.iotdb.db.engine.storagegroup.TsFileResource;
 import org.apache.iotdb.db.engine.storagegroup.VirtualStorageGroupProcessor;
@@ -55,7 +55,6 @@ import org.apache.iotdb.db.qp.physical.crud.InsertPlan;
 import org.apache.iotdb.db.qp.physical.crud.InsertRowPlan;
 import org.apache.iotdb.db.qp.physical.crud.InsertRowsOfOneDevicePlan;
 import org.apache.iotdb.db.qp.physical.crud.InsertTabletPlan;
-import org.apache.iotdb.db.qp.utils.DatetimeUtils;
 import org.apache.iotdb.db.rescon.SystemInfo;
 import org.apache.iotdb.db.service.IService;
 import org.apache.iotdb.db.service.IoTDB;
@@ -102,7 +101,6 @@ public class StorageEngine implements IService {
 
   private static final IoTDBConfig config = IoTDBDescriptor.getInstance().getConfig();
   private static final long TTL_CHECK_INTERVAL = 60 * 1000L;
-  private static final long MIGRATE_CHECK_INTERVAL = 60 * 1000L;
 
   /**
    * Time range for dividing storage group, the time unit is the same with IoTDB's
@@ -131,14 +129,13 @@ public class StorageEngine implements IService {
   private ScheduledExecutorService seqMemtableTimedFlushCheckThread;
   private ScheduledExecutorService unseqMemtableTimedFlushCheckThread;
   private ScheduledExecutorService tsFileTimedCloseCheckThread;
-  private ScheduledExecutorService migrationCheckThread;
 
   private TsFileFlushPolicy fileFlushPolicy = new DirectFlushPolicy();
   private ExecutorService recoveryThreadPool;
   // add customized listeners here for flush and close events
   private List<CloseFileListener> customCloseFileListeners = new ArrayList<>();
   private List<FlushListener> customFlushListeners = new ArrayList<>();
-  private List<MigrateTask> migrateTasks = new ArrayList<>();
+  private MigrateManager migrateManager = MigrateManager.getInstance();
 
   private StorageEngine() {}
 
@@ -284,12 +281,6 @@ public class StorageEngine implements IService {
     ttlCheckThread.scheduleAtFixedRate(
         this::checkTTL, TTL_CHECK_INTERVAL, TTL_CHECK_INTERVAL, TimeUnit.MILLISECONDS);
     logger.info("start ttl check thread successfully.");
-
-    migrationCheckThread =
-        IoTDBThreadPoolFactory.newSingleThreadScheduledExecutor("Migration-Check");
-    migrationCheckThread.scheduleAtFixedRate(
-        this::checkMigrate, MIGRATE_CHECK_INTERVAL, MIGRATE_CHECK_INTERVAL, TimeUnit.MILLISECONDS);
-    logger.info("start migrate check thread successfully.");
 
     startTimedService();
   }
@@ -908,44 +899,9 @@ public class StorageEngine implements IService {
     processorMap.get(storageGroup).setTTL(dataTTL);
   }
 
-  /** creates a copy of migrateTasks and returns */
-  public List<MigrateTask> getMigrateTasks() {
-    return new ArrayList<>(migrateTasks);
-  }
-
-  /** add migration task to migrationTasks for thread to check */
   public void setMigrate(PartialPath storageGroup, File targetDir, long ttl, long startTime) {
-    migrateTasks.add(new MigrateTask(storageGroup, targetDir, ttl, startTime));
+    migrateManager.setMigrate(storageGroup, targetDir, ttl, startTime);
     logger.info("start check migration task successfully.");
-  }
-
-  /** check if any of the migrateTasks can start */
-  public void checkMigrate() {
-    // copy migrateTasks to allow deletion
-    List<MigrateTask> migrateTaskList = getMigrateTasks();
-
-    for (int i = 0; i < migrateTaskList.size(); i++) {
-      MigrateTask task = migrateTaskList.get(i);
-
-      if (task.getStartTime() - DatetimeUtils.currentTime() <= 0
-          && task.getStatus() == MigrateTask.MigrateTaskStatus.READY) {
-
-        // storage group has no data
-        if (!processorMap.containsKey(task.getStorageGroup())) {
-          return;
-        }
-
-        // set task to migrating
-        migrateTasks.get(i).setStatus(MigrateTask.MigrateTaskStatus.RUNNING);
-
-        // push check migration to storageGroupManager
-        processorMap.get(task.getStorageGroup()).checkMigrate(task.getTargetDir(), task.getTTL());
-        logger.info("check migration task successfully.");
-
-        // set state and remove
-        migrateTasks.remove(task);
-      }
-    }
   }
 
   public void deleteStorageGroup(PartialPath storageGroupPath) {
@@ -1114,6 +1070,10 @@ public class StorageEngine implements IService {
 
   public Map<PartialPath, StorageGroupManager> getProcessorMap() {
     return processorMap;
+  }
+
+  public MigrateManager getMigrateManager() {
+    return migrateManager;
   }
 
   /**
