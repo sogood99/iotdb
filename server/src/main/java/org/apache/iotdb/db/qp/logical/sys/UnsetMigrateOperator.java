@@ -30,6 +30,8 @@ import org.apache.iotdb.db.qp.strategy.PhysicalGenerator;
 public class UnsetMigrateOperator extends Operator {
 
   private PartialPath storageGroup = null;
+
+  // MigrateTask index
   private long idx = -1;
 
   public UnsetMigrateOperator(int tokenIntType) {

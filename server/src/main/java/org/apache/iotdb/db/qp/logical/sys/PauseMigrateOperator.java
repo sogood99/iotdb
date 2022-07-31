@@ -9,6 +9,7 @@ import org.apache.iotdb.db.qp.strategy.PhysicalGenerator;
 
 public class PauseMigrateOperator extends Operator {
 
+  // MigrateTask index
   private long idx = -1;
   private PartialPath storageGroup;
 
