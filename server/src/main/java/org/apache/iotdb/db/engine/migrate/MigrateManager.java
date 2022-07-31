@@ -111,8 +111,9 @@ public class MigrateManager {
             errorSet.add(log.index);
             break;
           case FINISHED:
-            // finished task, remove from potential error task
+            // finished task => remove from list and remove from potential error task
             errorSet.remove(log.index);
+            migrateTasks.remove(log.index);
             finishFromLog(log.index);
             break;
           case ERROR:
