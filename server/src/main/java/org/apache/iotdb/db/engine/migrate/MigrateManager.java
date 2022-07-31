@@ -178,7 +178,7 @@ public class MigrateManager {
 
     MigrateTask newTask = new MigrateTask(index, storageGroup, targetDir, ttl, startTime);
     migrateTasks.put(index, newTask);
-    currentTaskIndex = index;
+    currentTaskIndex = index + 1;
   }
 
   /**
