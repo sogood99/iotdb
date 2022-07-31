@@ -7,11 +7,25 @@ import org.apache.iotdb.db.qp.physical.PhysicalPlan;
 import java.util.List;
 
 public class PauseMigratePlan extends PhysicalPlan {
-  private List<PartialPath> storageGroups;
+  private long idx;
+  private PartialPath storageGroup;
+  private boolean pause = true;
 
-  public PauseMigratePlan(List<PartialPath> storageGroups) {
+  public PauseMigratePlan(boolean pause) {
     super(Operator.OperatorType.PAUSE_MIGRATE);
-    this.storageGroups = storageGroups;
+    this.pause = pause;
+  }
+
+  public PauseMigratePlan(PartialPath storageGroup, boolean pause) {
+    super(Operator.OperatorType.PAUSE_MIGRATE);
+    this.storageGroup = storageGroup;
+    this.pause = pause;
+  }
+
+  public PauseMigratePlan(long idx, boolean pause) {
+    super(Operator.OperatorType.PAUSE_MIGRATE);
+    this.idx = idx;
+    this.pause = pause;
   }
 
   @Override
@@ -19,7 +33,15 @@ public class PauseMigratePlan extends PhysicalPlan {
     return null;
   }
 
-  public List<PartialPath> getStorageGroups() {
-    return storageGroups;
+  public long getIndex() {
+    return idx;
+  }
+
+  public boolean isPause() {
+    return pause;
+  }
+
+  public PartialPath getStorageGroup() {
+    return storageGroup;
   }
 }

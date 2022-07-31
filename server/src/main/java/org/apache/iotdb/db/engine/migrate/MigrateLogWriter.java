@@ -97,6 +97,16 @@ public class MigrateLogWriter implements AutoCloseable {
     putLog(log);
   }
 
+  public void pauseMigrate(MigrateTask migrateTask) throws IOException {
+    MigrateLog log = new MigrateLog(LogType.PAUSE, migrateTask.getIndex());
+    putLog(log);
+  }
+
+  public void unpauseMigrate(MigrateTask migrateTask) throws IOException {
+    MigrateLog log = new MigrateLog(LogType.UNPAUSE, migrateTask.getIndex());
+    putLog(log);
+  }
+
   public void error(MigrateTask migrateTask) throws IOException {
     MigrateLog log = new MigrateLog(LogType.ERROR, migrateTask.getIndex());
     putLog(log);
@@ -143,6 +153,7 @@ public class MigrateLogWriter implements AutoCloseable {
     UNSET,
     START,
     PAUSE,
+    UNPAUSE,
     FINISHED,
     ERROR
   }

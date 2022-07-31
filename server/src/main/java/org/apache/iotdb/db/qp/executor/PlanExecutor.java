@@ -106,6 +106,7 @@ import org.apache.iotdb.db.qp.physical.sys.FlushPlan;
 import org.apache.iotdb.db.qp.physical.sys.KillQueryPlan;
 import org.apache.iotdb.db.qp.physical.sys.LoadConfigurationPlan;
 import org.apache.iotdb.db.qp.physical.sys.OperateFilePlan;
+import org.apache.iotdb.db.qp.physical.sys.PauseMigratePlan;
 import org.apache.iotdb.db.qp.physical.sys.PruneTemplatePlan;
 import org.apache.iotdb.db.qp.physical.sys.SetMigratePlan;
 import org.apache.iotdb.db.qp.physical.sys.SetStorageGroupPlan;
@@ -417,6 +418,9 @@ public class PlanExecutor implements IPlanExecutor {
         return processShowQueryResource();
       case MIGRATE:
         operateMigrate((SetMigratePlan) plan);
+        return true;
+      case PAUSE_MIGRATE:
+        operatePauseMigrate((PauseMigratePlan) plan);
         return true;
       default:
         throw new UnsupportedOperationException(
@@ -1616,6 +1620,7 @@ public class PlanExecutor implements IPlanExecutor {
 
   private void operateMigrate(SetMigratePlan plan) throws QueryProcessException {
     if (plan.getTargetDir() == null) {
+      // is unset plan
       StorageEngine.getInstance().unsetMigrate(plan.getIndex(), plan.getStorageGroup());
     } else {
       try {
@@ -1628,6 +1633,14 @@ public class PlanExecutor implements IPlanExecutor {
       } catch (MetadataException e) {
         throw new QueryProcessException(e);
       }
+    }
+  }
+
+  private void operatePauseMigrate(PauseMigratePlan plan) {
+    if (plan.isPause()) {
+      StorageEngine.getInstance().pauseMigrate(plan.getIndex(), plan.getStorageGroup());
+    } else {
+      StorageEngine.getInstance().unpauseMigrate(plan.getIndex(), plan.getStorageGroup());
     }
   }
 

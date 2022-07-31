@@ -354,6 +354,10 @@ ORDER
     : O R D E R
     ;
 
+PAUSE
+    : P A U S E
+    ;
+
 PARTITION
     : P A R T I T I O N
     ;
@@ -548,6 +552,10 @@ UNLINK
 
 UNLOAD
     : U N L O A D
+    ;
+
+UNPAUSE
+    : U N P A U S E
     ;
 
 UNSET

@@ -33,7 +33,7 @@ import java.util.List;
 
 public class SetMigratePlan extends PhysicalPlan {
 
-  private long index = -1;
+  private long idx = -1;
   private PartialPath storageGroup;
   private File targetDir;
   private long ttl;
@@ -53,10 +53,10 @@ public class SetMigratePlan extends PhysicalPlan {
   }
 
   public SetMigratePlan(
-      long index, PartialPath storageGroup, File targetDir, long ttl, long startTime) {
+      long idx, PartialPath storageGroup, File targetDir, long ttl, long startTime) {
     // set migrate w/ index
     super(OperatorType.MIGRATE);
-    this.index = index;
+    this.idx = idx;
     this.storageGroup = storageGroup;
     this.targetDir = targetDir;
     this.ttl = ttl;
@@ -68,9 +68,9 @@ public class SetMigratePlan extends PhysicalPlan {
     this(storageGroup, null, Long.MAX_VALUE, Long.MAX_VALUE);
   }
 
-  public SetMigratePlan(long index) {
+  public SetMigratePlan(long idx) {
     // unset migrate using index
-    this(index, null, null, Long.MAX_VALUE, Long.MAX_VALUE);
+    this(idx, null, null, Long.MAX_VALUE, Long.MAX_VALUE);
   }
 
   @Override
@@ -87,7 +87,7 @@ public class SetMigratePlan extends PhysicalPlan {
     putString(stream, storageGroup.getFullPath());
     putString(stream, targetDir.getAbsolutePath());
 
-    stream.writeLong(index);
+    stream.writeLong(idx);
   }
 
   @Override
@@ -99,7 +99,7 @@ public class SetMigratePlan extends PhysicalPlan {
     putString(buffer, storageGroup.getFullPath());
     putString(buffer, targetDir.getAbsolutePath());
 
-    buffer.putLong(index);
+    buffer.putLong(idx);
   }
 
   @Override
@@ -109,7 +109,7 @@ public class SetMigratePlan extends PhysicalPlan {
     this.storageGroup = new PartialPath(readString(buffer));
     this.targetDir = new File(readString(buffer));
 
-    this.index = buffer.getLong();
+    this.idx = buffer.getLong();
   }
 
   public PartialPath getStorageGroup() {

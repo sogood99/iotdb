@@ -914,6 +914,26 @@ public class StorageEngine implements IService {
     }
   }
 
+  public void pauseMigrate(long index, PartialPath storageGroup) {
+    if (index != -1) {
+      // pause using index
+      migrateManager.pauseMigrate(index);
+    } else if (storageGroup != null) {
+      // pause using storage group
+      migrateManager.pauseMigrate(storageGroup);
+    }
+  }
+
+  public void unpauseMigrate(long index, PartialPath storageGroup) {
+    if (index != -1) {
+      // pause using index
+      migrateManager.unpauseMigrate(index);
+    } else if (storageGroup != null) {
+      // pause using storage group
+      migrateManager.unpauseMigrate(storageGroup);
+    }
+  }
+
   public void deleteStorageGroup(PartialPath storageGroupPath) {
     if (!processorMap.containsKey(storageGroupPath)) {
       return;

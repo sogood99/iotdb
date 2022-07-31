@@ -773,6 +773,7 @@ public class IoTDBSqlVisitor extends IoTDBSqlParserBaseVisitor<Operator> {
     return operator;
   }
 
+  // Unset migrate
   @Override
   public Operator visitUnsetMigrate(IoTDBSqlParser.UnsetMigrateContext ctx) {
     UnsetMigrateOperator operator = new UnsetMigrateOperator(SQLConstant.TOK_UNSET);
@@ -783,6 +784,36 @@ public class IoTDBSqlVisitor extends IoTDBSqlParserBaseVisitor<Operator> {
     } else {
       // unknown case
       throw new SQLParserException("unset migration unknown case");
+    }
+    return operator;
+  }
+
+  // Pause migrate
+  @Override
+  public Operator visitPauseMigrate(IoTDBSqlParser.PauseMigrateContext ctx) {
+    PauseMigrateOperator operator = new PauseMigrateOperator(SQLConstant.TOK_SET);
+    if (ctx.storageGroup != null) {
+      operator.setStorageGroup(parsePrefixPath(ctx.storageGroup));
+    } else if (ctx.index != null) {
+      operator.setIndex(Long.parseLong(ctx.index.getText()));
+    } else {
+      // unknown case
+      throw new SQLParserException("pause migration unknown case");
+    }
+    return operator;
+  }
+
+  // Unpause migrate
+  @Override
+  public Operator visitUnpauseMigrate(IoTDBSqlParser.UnpauseMigrateContext ctx) {
+    UnpauseMigrateOperator operator = new UnpauseMigrateOperator(SQLConstant.TOK_UNSET);
+    if (ctx.storageGroup != null) {
+      operator.setStorageGroup(parsePrefixPath(ctx.storageGroup));
+    } else if (ctx.index != null) {
+      operator.setIndex(Long.parseLong(ctx.index.getText()));
+    } else {
+      // unknown case
+      throw new SQLParserException("unpause migration unknown case");
     }
     return operator;
   }

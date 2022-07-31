@@ -110,6 +110,13 @@ public class MigrateManager {
             // if task started but didn't finish, then error occurred
             errorSet.add(log.index);
             break;
+          case PAUSE:
+            errorSet.remove(log.index);
+            pauseMigrateFromLog(log.index);
+            break;
+          case UNPAUSE:
+            unpauseMigrateFromLog(log.index);
+            break;
           case FINISHED:
             // finished task => remove from list and remove from potential error task
             errorSet.remove(log.index);
@@ -183,7 +190,7 @@ public class MigrateManager {
   }
 
   /**
-   * remove migration task from migrationTasks list using index
+   * unset migration task from migrationTasks list using index
    *
    * @param removeIndex index of task to remove
    * @return true if task with index exists
@@ -209,7 +216,7 @@ public class MigrateManager {
   }
 
   /**
-   * remove migration task from migrationTasks list using storage group if multiple tasks with such
+   * unset migration task from migrationTasks list using storage group if multiple tasks with such
    * storage group exists, remove the one with the lowest index
    *
    * @param storageGroup sg name for task to remove
@@ -238,6 +245,126 @@ public class MigrateManager {
   public boolean unsetMigrateFromLog(long index) {
     if (migrateTasks.containsKey(index)) {
       migrateTasks.remove(index);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  /**
+   * pause migration task from migrationTasks list using index
+   *
+   * @param index index of task to pause
+   * @return true if task with index exists
+   */
+  public boolean pauseMigrate(long index) {
+    if (migrateTasks.containsKey(index)) {
+      MigrateTask task = migrateTasks.get(index);
+      if (task.getStatus() == MigrateTask.MigrateTaskStatus.READY
+          || task.getStatus() == MigrateTask.MigrateTaskStatus.RUNNING) {
+        // write to log
+        try {
+          logWriter.pauseMigrate(task);
+        } catch (IOException e) {
+          logger.error("write log error");
+        }
+        // change status to PAUSED
+        task.setStatus(MigrateTask.MigrateTaskStatus.PAUSED);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * pause migration task from migrationTasks list using storage group if multiple tasks with such
+   * storage group exists, remove the one with the lowest index
+   *
+   * @param storageGroup sg name for task to remove
+   * @return true if exists task with storageGroup
+   */
+  public boolean pauseMigrate(PartialPath storageGroup) {
+    for (MigrateTask task : migrateTasks.values()) {
+      if (task.getStorageGroup() == storageGroup
+          && (task.getStatus() == MigrateTask.MigrateTaskStatus.READY
+              || task.getStatus() == MigrateTask.MigrateTaskStatus.RUNNING)) {
+        // write to log
+        try {
+          logWriter.pauseMigrate(task);
+        } catch (IOException e) {
+          logger.error("write log error");
+        }
+        // change status to PAUSED
+        task.setStatus(MigrateTask.MigrateTaskStatus.PAUSED);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /** same as pauseMigrate using index except does not write to log */
+  public boolean pauseMigrateFromLog(long index) {
+    if (migrateTasks.containsKey(index)) {
+      migrateTasks.get(index).setStatus(MigrateTask.MigrateTaskStatus.PAUSED);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  /**
+   * unpause migration task from migrationTasks list using index
+   *
+   * @param index index of task to unpause
+   * @return true if task with index exists
+   */
+  public boolean unpauseMigrate(long index) {
+    if (migrateTasks.containsKey(index)) {
+      MigrateTask task = migrateTasks.get(index);
+      if (task.getStatus() == MigrateTask.MigrateTaskStatus.PAUSED) {
+        // write to log
+        try {
+          logWriter.unpauseMigrate(task);
+        } catch (IOException e) {
+          logger.error("write log error");
+        }
+        // change status to READY
+        task.setStatus(MigrateTask.MigrateTaskStatus.READY);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * pause migration task from migrationTasks list using storage group if multiple tasks with such
+   * storage group exists, remove the one with the lowest index
+   *
+   * @param storageGroup sg name for task to remove
+   * @return true if exists task with storageGroup
+   */
+  public boolean unpauseMigrate(PartialPath storageGroup) {
+    for (MigrateTask task : migrateTasks.values()) {
+      if (task.getStorageGroup() == storageGroup
+          && (task.getStatus() == MigrateTask.MigrateTaskStatus.PAUSED)) {
+        // write to log
+        try {
+          logWriter.unpauseMigrate(task);
+        } catch (IOException e) {
+          logger.error("write log error");
+        }
+        // change status to READY
+        task.setStatus(MigrateTask.MigrateTaskStatus.READY);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /** same as pauseMigrate using index except does not write to log */
+  public boolean unpauseMigrateFromLog(long index) {
+    if (migrateTasks.containsKey(index)) {
+      migrateTasks.get(index).setStatus(MigrateTask.MigrateTaskStatus.READY);
       return true;
     } else {
       return false;

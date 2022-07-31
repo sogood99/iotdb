@@ -46,7 +46,7 @@ ddlStatement
     | showSchemaTemplates | showNodesInSchemaTemplate
     | showPathsUsingSchemaTemplate | showPathsSetSchemaTemplate
     | countStorageGroup | countDevices | countTimeseries | countNodes | setMigrate
-    | unsetMigrate | showMigrate | showAllMigrate
+    | unsetMigrate | pauseMigrate | unpauseMigrate | showMigrate | showAllMigrate
     ;
 
 dmlStatement
@@ -334,6 +334,16 @@ setMigrate
 // Unset Migrate using Index or Storage Group
 unsetMigrate
     : UNSET MIGRATION (ON storageGroup=prefixPath | index=INTEGER_LITERAL)
+    ;
+
+// Pause migration task
+pauseMigrate
+    : PAUSE MIGRATION (ON storageGroup=prefixPath | index=INTEGER_LITERAL)
+    ;
+
+// Continue/Unpause migration task
+unpauseMigrate
+    : UNPAUSE MIGRATION (ON storageGroup=prefixPath | index=INTEGER_LITERAL)
     ;
 
 // Show Migrate

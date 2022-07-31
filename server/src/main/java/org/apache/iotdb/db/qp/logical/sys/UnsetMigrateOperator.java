@@ -30,7 +30,7 @@ import org.apache.iotdb.db.qp.strategy.PhysicalGenerator;
 public class UnsetMigrateOperator extends Operator {
 
   private PartialPath storageGroup = null;
-  private long index = -1;
+  private long idx = -1;
 
   public UnsetMigrateOperator(int tokenIntType) {
     super(tokenIntType);
@@ -46,11 +46,11 @@ public class UnsetMigrateOperator extends Operator {
   }
 
   public long getIndex() {
-    return index;
+    return idx;
   }
 
-  public void setIndex(long index) {
-    this.index = index;
+  public void setIndex(long idx) {
+    this.idx = idx;
   }
 
   @Override
@@ -58,8 +58,8 @@ public class UnsetMigrateOperator extends Operator {
       throws QueryProcessException {
     if (storageGroup != null) {
       return new SetMigratePlan(storageGroup);
-    } else if (index != -1) {
-      return new SetMigratePlan(index);
+    } else if (idx != -1) {
+      return new SetMigratePlan(idx);
     } else {
       return new SetMigratePlan();
     }
