@@ -193,6 +193,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -1226,10 +1227,10 @@ public class PlanExecutor implements IPlanExecutor {
                 TSDataType.TEXT));
     Set<PartialPath> selectedSgs = new HashSet<>(showMigratePlan.getStorageGroups());
 
-    List<MigrateTask> migrateTaskList =
+    ConcurrentHashMap<Long, MigrateTask> migrateTaskList =
         StorageEngine.getInstance().getMigrateManager().getMigrateTasks();
     int timestamp = 0;
-    for (MigrateTask task : migrateTaskList) {
+    for (MigrateTask task : migrateTaskList.values()) {
       PartialPath sgName = task.getStorageGroup();
       if (!selectedSgs.isEmpty() && !selectedSgs.contains(sgName)) {
         continue;
@@ -1614,15 +1615,19 @@ public class PlanExecutor implements IPlanExecutor {
   }
 
   private void operateMigrate(SetMigratePlan plan) throws QueryProcessException {
-    try {
-      List<PartialPath> storageGroupPaths =
-          IoTDB.metaManager.getMatchedStorageGroups(plan.getStorageGroup(), plan.isPrefixMatch());
-      for (PartialPath storagePath : storageGroupPaths) {
-        StorageEngine.getInstance()
-            .setMigrate(storagePath, plan.getTargetDir(), plan.getTTL(), plan.getStartTime());
+    if (plan.getTargetDir() == null) {
+      StorageEngine.getInstance().unsetMigrate(plan.getIndex(), plan.getStorageGroup());
+    } else {
+      try {
+        List<PartialPath> storageGroupPaths =
+            IoTDB.metaManager.getMatchedStorageGroups(plan.getStorageGroup(), plan.isPrefixMatch());
+        for (PartialPath storagePath : storageGroupPaths) {
+          StorageEngine.getInstance()
+              .setMigrate(storagePath, plan.getTargetDir(), plan.getTTL(), plan.getStartTime());
+        }
+      } catch (MetadataException e) {
+        throw new QueryProcessException(e);
       }
-    } catch (MetadataException e) {
-      throw new QueryProcessException(e);
     }
   }
 

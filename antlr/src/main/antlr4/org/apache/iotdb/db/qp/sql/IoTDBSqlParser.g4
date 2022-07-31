@@ -46,7 +46,7 @@ ddlStatement
     | showSchemaTemplates | showNodesInSchemaTemplate
     | showPathsUsingSchemaTemplate | showPathsSetSchemaTemplate
     | countStorageGroup | countDevices | countTimeseries | countNodes | setMigrate
-    | showMigrate | showAllMigrate
+    | unsetMigrate | showMigrate | showAllMigrate
     ;
 
 dmlStatement
@@ -329,6 +329,11 @@ countNodes
 // Set Migrate
 setMigrate
     : SET MIGRATION TO path=prefixPath startTime=DATETIME_LITERAL ttl=INTEGER_LITERAL targetDir=STRING_LITERAL
+    ;
+
+// Unset Migrate using Index or Storage Group
+unsetMigrate
+    : UNSET MIGRATION (ON storageGroup=prefixPath | index=INTEGER_LITERAL)
     ;
 
 // Show Migrate

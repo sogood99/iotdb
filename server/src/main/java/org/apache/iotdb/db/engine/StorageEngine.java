@@ -904,6 +904,16 @@ public class StorageEngine implements IService {
     logger.info("start check migration task successfully.");
   }
 
+  public void unsetMigrate(long index, PartialPath storageGroup) {
+    if (index != -1) {
+      // unset using index
+      migrateManager.unsetMigrate(index);
+    } else if (storageGroup != null) {
+      // unset using storage group
+      migrateManager.unsetMigrate(storageGroup);
+    }
+  }
+
   public void deleteStorageGroup(PartialPath storageGroupPath) {
     if (!processorMap.containsKey(storageGroupPath)) {
       return;

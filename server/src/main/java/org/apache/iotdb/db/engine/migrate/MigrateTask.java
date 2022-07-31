@@ -92,6 +92,7 @@ public class MigrateTask {
   public enum MigrateTaskStatus {
     READY,
     RUNNING,
+    UNSET,
     PAUSED,
     CANCELING,
     ERROR,

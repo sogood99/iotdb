@@ -1523,9 +1523,9 @@ public class VirtualStorageGroupProcessor {
 
   /** iterate over TsFiles and migrate to targetDir if out of ttl */
   public void checkMigrate(File targetDir, long ttl) {
-    if (dataTTL == Long.MAX_VALUE) {
+    if (ttl == Long.MAX_VALUE) {
       logger.debug(
-          "{}: TTL not set, ignore the check",
+          "{}: Migration ttl not set, ignore the check",
           logicalStorageGroupName + "-" + virtualStorageGroupId);
       return;
     }

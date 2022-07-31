@@ -773,6 +773,20 @@ public class IoTDBSqlVisitor extends IoTDBSqlParserBaseVisitor<Operator> {
     return operator;
   }
 
+  @Override
+  public Operator visitUnsetMigrate(IoTDBSqlParser.UnsetMigrateContext ctx) {
+    UnsetMigrateOperator operator = new UnsetMigrateOperator(SQLConstant.TOK_UNSET);
+    if (ctx.storageGroup != null) {
+      operator.setStorageGroup(parsePrefixPath(ctx.storageGroup));
+    } else if (ctx.index != null) {
+      operator.setIndex(Long.parseLong(ctx.index.getText()));
+    } else {
+      // unknown case
+      throw new SQLParserException("unset migration unknown case");
+    }
+    return operator;
+  }
+
   // Show Migrate
   @Override
   public Operator visitShowMigrate(IoTDBSqlParser.ShowMigrateContext ctx) {

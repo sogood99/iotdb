@@ -56,10 +56,14 @@ public class MigrateLogReader implements AutoCloseable {
 
     int typeNum = ReadWriteIOUtils.readByte(logFileInStream);
     log.type = MigrateLogWriter.LogType.values()[typeNum];
-    log.storageGroup = new PartialPath(ReadWriteIOUtils.readString(logFileInStream));
-    log.targetDirPath = ReadWriteIOUtils.readString(logFileInStream);
-    log.startTime = ReadWriteIOUtils.readLong(logFileInStream);
-    log.ttl = ReadWriteIOUtils.readLong(logFileInStream);
+    log.index = ReadWriteIOUtils.readLong(logFileInStream);
+
+    if (log.type == MigrateLogWriter.LogType.SET) {
+      log.storageGroup = new PartialPath(ReadWriteIOUtils.readString(logFileInStream));
+      log.targetDirPath = ReadWriteIOUtils.readString(logFileInStream);
+      log.startTime = ReadWriteIOUtils.readLong(logFileInStream);
+      log.ttl = ReadWriteIOUtils.readLong(logFileInStream);
+    }
 
     return log;
   }

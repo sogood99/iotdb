@@ -33,6 +33,7 @@ import java.util.List;
 
 public class SetMigratePlan extends PhysicalPlan {
 
+  private long index = -1;
   private PartialPath storageGroup;
   private File targetDir;
   private long ttl;
@@ -51,9 +52,25 @@ public class SetMigratePlan extends PhysicalPlan {
     this.startTime = startTime;
   }
 
+  public SetMigratePlan(
+      long index, PartialPath storageGroup, File targetDir, long ttl, long startTime) {
+    // set migrate w/ index
+    super(OperatorType.MIGRATE);
+    this.index = index;
+    this.storageGroup = storageGroup;
+    this.targetDir = targetDir;
+    this.ttl = ttl;
+    this.startTime = startTime;
+  }
+
   public SetMigratePlan(PartialPath storageGroup) {
-    // unset migrate
+    // unset migrate using storage group
     this(storageGroup, null, Long.MAX_VALUE, Long.MAX_VALUE);
+  }
+
+  public SetMigratePlan(long index) {
+    // unset migrate using index
+    this(index, null, null, Long.MAX_VALUE, Long.MAX_VALUE);
   }
 
   @Override

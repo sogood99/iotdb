@@ -57,10 +57,14 @@ public class MigrateLogWriter implements AutoCloseable {
     try {
       int type = log.type.ordinal();
       ReadWriteIOUtils.write((byte) type, logFileOutStream);
-      ReadWriteIOUtils.write(log.storageGroup.getFullPath(), logFileOutStream);
-      ReadWriteIOUtils.write(log.targetDirPath, logFileOutStream);
-      ReadWriteIOUtils.write(log.startTime, logFileOutStream);
-      ReadWriteIOUtils.write(log.ttl, logFileOutStream);
+      ReadWriteIOUtils.write(log.index, logFileOutStream);
+
+      if (log.type == LogType.SET) {
+        ReadWriteIOUtils.write(log.storageGroup.getFullPath(), logFileOutStream);
+        ReadWriteIOUtils.write(log.targetDirPath, logFileOutStream);
+        ReadWriteIOUtils.write(log.startTime, logFileOutStream);
+        ReadWriteIOUtils.write(log.ttl, logFileOutStream);
+      }
     } catch (IOException e) {
       logger.error("unable to write to migrate log");
     }
@@ -85,6 +89,16 @@ public class MigrateLogWriter implements AutoCloseable {
 
   public void finishMigrate(MigrateTask migrateTask) throws IOException {
     MigrateLog log = new MigrateLog(LogType.FINISHED, migrateTask.getIndex());
+    putLog(log);
+  }
+
+  public void unsetMigrate(MigrateTask migrateTask) throws IOException {
+    MigrateLog log = new MigrateLog(LogType.UNSET, migrateTask.getIndex());
+    putLog(log);
+  }
+
+  public void error(MigrateTask migrateTask) throws IOException {
+    MigrateLog log = new MigrateLog(LogType.ERROR, migrateTask.getIndex());
     putLog(log);
   }
 
@@ -126,8 +140,10 @@ public class MigrateLogWriter implements AutoCloseable {
 
   public enum LogType {
     SET,
+    UNSET,
     START,
     PAUSE,
-    FINISHED
+    FINISHED,
+    ERROR
   }
 }

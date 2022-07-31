@@ -530,15 +530,21 @@ public class TsFileResource {
    * @return migrated data file
    */
   public File migrate(File targetDir) {
+    File resourceFile = fsFactory.getFile(file.getPath() + RESOURCE_SUFFIX);
+    File modFile = fsFactory.getFile(file.getPath() + ModificationFile.FILE_SUFFIX);
+
     File migratedFile = fsFactory.getFile(targetDir, file.getName());
     File migratedResourceFile = fsFactory.getFile(targetDir, file.getName() + RESOURCE_SUFFIX);
     File migratedModificationFile =
         fsFactory.getFile(targetDir, file.getName() + ModificationFile.FILE_SUFFIX);
-    fsFactory.moveFile(file, migratedFile);
-    fsFactory.moveFile(fsFactory.getFile(file.getPath() + RESOURCE_SUFFIX), migratedResourceFile);
-    fsFactory.moveFile(
-        fsFactory.getFile(file.getPath() + ModificationFile.FILE_SUFFIX), migratedModificationFile);
 
+    fsFactory.moveFile(file, migratedFile);
+    if (resourceFile.exists()) {
+      fsFactory.moveFile(resourceFile, migratedResourceFile);
+    }
+    if (modFile.exists()) {
+      fsFactory.moveFile(modFile, migratedModificationFile);
+    }
     return migratedFile;
   }
 
