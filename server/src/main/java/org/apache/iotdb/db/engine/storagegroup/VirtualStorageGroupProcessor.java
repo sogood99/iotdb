@@ -32,6 +32,7 @@ import org.apache.iotdb.db.engine.fileSystem.SystemFileFactory;
 import org.apache.iotdb.db.engine.flush.CloseFileListener;
 import org.apache.iotdb.db.engine.flush.FlushListener;
 import org.apache.iotdb.db.engine.flush.TsFileFlushPolicy;
+import org.apache.iotdb.db.engine.migrate.MigrateTask;
 import org.apache.iotdb.db.engine.modification.Deletion;
 import org.apache.iotdb.db.engine.modification.ModificationFile;
 import org.apache.iotdb.db.engine.querycontext.QueryDataSource;
@@ -1522,14 +1523,14 @@ public class VirtualStorageGroupProcessor {
   }
 
   /** iterate over TsFiles and migrate to targetDir if out of ttl */
-  public void checkMigrate(File targetDir, long ttl) {
-    if (ttl == Long.MAX_VALUE) {
+  public void checkMigrate(MigrateTask task) {
+    if (task.getTTL() == Long.MAX_VALUE) {
       logger.debug(
           "{}: Migration ttl not set, ignore the check",
           logicalStorageGroupName + "-" + virtualStorageGroupId);
       return;
     }
-    long ttlLowerBound = System.currentTimeMillis() - ttl;
+    long ttlLowerBound = System.currentTimeMillis() - task.getTTL();
     logger.debug(
         "{}: TTL removing files before {}",
         logicalStorageGroupName + "-" + virtualStorageGroupId,
@@ -1540,10 +1541,19 @@ public class VirtualStorageGroupProcessor {
     List<TsFileResource> unseqFiles = new ArrayList<>(tsFileManager.getTsFileList(false));
 
     for (TsFileResource tsFileResource : seqFiles) {
-      checkMigrateFile(tsFileResource, targetDir, ttlLowerBound, true);
+      if (task.getStatus() != MigrateTask.MigrateTaskStatus.RUNNING) {
+        // task stopped running, return
+        return;
+      }
+      checkMigrateFile(tsFileResource, task.getTargetDir(), ttlLowerBound, true);
     }
+
     for (TsFileResource tsFileResource : unseqFiles) {
-      checkMigrateFile(tsFileResource, targetDir, ttlLowerBound, false);
+      if (task.getStatus() != MigrateTask.MigrateTaskStatus.RUNNING) {
+        // task stopped running, return
+        return;
+      }
+      checkMigrateFile(tsFileResource, task.getTargetDir(), ttlLowerBound, false);
     }
   }
 

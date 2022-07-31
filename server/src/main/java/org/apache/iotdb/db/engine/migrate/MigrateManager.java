@@ -419,7 +419,7 @@ public class MigrateManager {
               StorageEngine.getInstance()
                   .getProcessorMap()
                   .get(task.getStorageGroup())
-                  .checkMigrate(task.getTargetDir(), task.getTTL());
+                  .checkMigrate(task);
               logger.info("check migration task successfully.");
 
               // set state and remove
