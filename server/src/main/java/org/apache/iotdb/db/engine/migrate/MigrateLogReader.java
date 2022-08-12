@@ -28,13 +28,16 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.channels.FileChannel;
 
 public class MigrateLogReader implements AutoCloseable {
   private static final Logger logger = LoggerFactory.getLogger(MigrateLogReader.class);
   private File logFile;
   private FileInputStream logFileInStream;
   private MigrateLogWriter.MigrateLog log;
+  private long unbrokenLogsSize = 0;
 
   public MigrateLogReader(String logFilePath) throws IOException {
     logFile = SystemFileFactory.INSTANCE.getFile(logFilePath);
@@ -46,7 +49,9 @@ public class MigrateLogReader implements AutoCloseable {
     logFileInStream = new FileInputStream(logFile);
   }
 
-  /** @return MigrateLog from log file, null if nothing left in file */
+  /**
+   * @return MigrateLog from log file, null if nothing left in file
+   */
   private MigrateLogWriter.MigrateLog readLog() throws IOException, IllegalPathException {
     if (logFileInStream.available() == 0) {
       return null;
@@ -55,7 +60,9 @@ public class MigrateLogReader implements AutoCloseable {
     MigrateLogWriter.MigrateLog log = new MigrateLogWriter.MigrateLog();
 
     int typeNum = ReadWriteIOUtils.readByte(logFileInStream);
-    log.type = MigrateLogWriter.LogType.values()[typeNum];
+    if (typeNum >= 0 && typeNum < MigrateLogWriter.LogType.values().length)
+      log.type = MigrateLogWriter.LogType.values()[typeNum];
+    else throw new IOException();
     log.index = ReadWriteIOUtils.readLong(logFileInStream);
 
     if (log.type == MigrateLogWriter.LogType.SET) {
@@ -64,6 +71,8 @@ public class MigrateLogReader implements AutoCloseable {
       log.startTime = ReadWriteIOUtils.readLong(logFileInStream);
       log.ttl = ReadWriteIOUtils.readLong(logFileInStream);
     }
+
+    unbrokenLogsSize = logFileInStream.getChannel().position();
 
     return log;
   }
@@ -82,8 +91,18 @@ public class MigrateLogReader implements AutoCloseable {
       return (log = readLog()) != null;
     } catch (IOException | IllegalPathException e) {
       logger.warn("Read migration log error.");
+      truncateBrokenLogs();
       log = null;
       return false;
+    }
+  }
+
+  private void truncateBrokenLogs() {
+    try (FileOutputStream outputStream = new FileOutputStream(logFile, true);
+        FileChannel channel = outputStream.getChannel()) {
+      channel.truncate(unbrokenLogsSize);
+    } catch (IOException e) {
+      logger.error("Fail to truncate log file to size {}", unbrokenLogsSize, e);
     }
   }
 

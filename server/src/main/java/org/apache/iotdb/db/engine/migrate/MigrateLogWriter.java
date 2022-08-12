@@ -146,6 +146,15 @@ public class MigrateLogWriter implements AutoCloseable {
       this.startTime = startTime;
       this.ttl = ttl;
     }
+
+    public MigrateLog(LogType type, MigrateTask task) {
+      this.type = type;
+      this.index = task.getIndex();
+      this.storageGroup = task.getStorageGroup();
+      this.targetDirPath = task.getTargetDir().getPath();
+      this.startTime = task.getStartTime();
+      this.ttl = task.getTTL();
+    }
   }
 
   public enum LogType {
