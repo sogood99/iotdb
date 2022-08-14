@@ -897,6 +897,7 @@ public class MManager {
       logWriter.setTTL(storageGroup, dataTTL);
     }
   }
+
   // endregion
 
   // region Interfaces for get and auto create device

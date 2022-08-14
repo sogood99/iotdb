@@ -45,7 +45,8 @@ ddlStatement
     | showFunctions | showTriggers | showContinuousQueries | showTTL | showAllTTL
     | showSchemaTemplates | showNodesInSchemaTemplate
     | showPathsUsingSchemaTemplate | showPathsSetSchemaTemplate
-    | countStorageGroup | countDevices | countTimeseries | countNodes
+    | countStorageGroup | countDevices | countTimeseries | countNodes | setMigrate
+    | unsetMigrate | pauseMigrate | unpauseMigrate | showMigrate | showAllMigrate
     ;
 
 dmlStatement
@@ -325,6 +326,35 @@ countNodes
     : COUNT NODES prefixPath LEVEL OPERATOR_EQ INTEGER_LITERAL
     ;
 
+// Set Migrate
+setMigrate
+    : SET MIGRATION TO path=prefixPath startTime=DATETIME_LITERAL ttl=INTEGER_LITERAL targetDir=STRING_LITERAL
+    ;
+
+// Unset Migrate using Index or Storage Group
+unsetMigrate
+    : UNSET MIGRATION (ON storageGroup=prefixPath | taskId=INTEGER_LITERAL)
+    ;
+
+// Pause migration task
+pauseMigrate
+    : PAUSE MIGRATION (ON storageGroup=prefixPath | taskId=INTEGER_LITERAL)
+    ;
+
+// Continue/Unpause migration task
+unpauseMigrate
+    : UNPAUSE MIGRATION (ON storageGroup=prefixPath | taskId=INTEGER_LITERAL)
+    ;
+
+// Show Migrate
+showMigrate
+    : SHOW MIGRATION ON prefixPath (COMMA prefixPath)*
+    ;
+
+// Show All Migrate
+showAllMigrate
+    : SHOW ALL MIGRATION
+    ;
 
 /**
  * 3. Data Manipulation Language (DML)

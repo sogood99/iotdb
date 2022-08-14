@@ -15,42 +15,32 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
+ *
  */
-package org.apache.iotdb.db.qp.physical.sys;
+package org.apache.iotdb.db.qp.logical.sys;
 
-import org.apache.iotdb.db.exception.metadata.IllegalPathException;
 import org.apache.iotdb.db.metadata.path.PartialPath;
-import org.apache.iotdb.db.qp.logical.Operator.OperatorType;
+import org.apache.iotdb.db.qp.constant.SQLConstant;
 import org.apache.iotdb.db.qp.physical.PhysicalPlan;
+import org.apache.iotdb.db.qp.physical.sys.ShowMigratePlan;
+import org.apache.iotdb.db.qp.strategy.PhysicalGenerator;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.Collections;
 import java.util.List;
 
-public class ClearCachePlan extends PhysicalPlan {
+public class ShowMigrateOperator extends ShowOperator {
+  private List<PartialPath> storageGroups;
 
-  public ClearCachePlan() {
-    super(OperatorType.CLEAR_CACHE);
+  public ShowMigrateOperator(List<PartialPath> storageGroups) {
+    super(SQLConstant.TOK_SHOW, OperatorType.MIGRATE);
+    this.storageGroups = storageGroups;
+  }
+
+  public List<PartialPath> getStorageGroups() {
+    return storageGroups;
   }
 
   @Override
-  public List<PartialPath> getPaths() {
-    //    CompletableFuture
-    return Collections.emptyList();
+  public PhysicalPlan generatePhysicalPlan(PhysicalGenerator generator) {
+    return new ShowMigratePlan(storageGroups);
   }
-
-  @Override
-  public void serialize(DataOutputStream stream) throws IOException {
-    stream.writeByte((byte) PhysicalPlanType.CLEARCACHE.ordinal());
-  }
-
-  @Override
-  public void serializeImpl(ByteBuffer buffer) {
-    buffer.put((byte) PhysicalPlanType.CLEARCACHE.ordinal());
-  }
-
-  @Override
-  public void deserialize(ByteBuffer buffer) throws IllegalPathException {}
 }

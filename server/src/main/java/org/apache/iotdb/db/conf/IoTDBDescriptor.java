@@ -1082,8 +1082,7 @@ public class IoTDBDescriptor {
         .setValueEncoder(
             properties.getProperty(
                 "value_encoder", TSFileDescriptor.getInstance().getConfig().getValueEncoder()));
-    TSFileDescriptor.getInstance()
-        .getConfig();
+    TSFileDescriptor.getInstance().getConfig();
     TSFileDescriptor.getInstance()
         .getConfig()
         .setMaxDegreeOfIndexNode(

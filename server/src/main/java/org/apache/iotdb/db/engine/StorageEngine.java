@@ -28,6 +28,7 @@ import org.apache.iotdb.db.engine.flush.CloseFileListener;
 import org.apache.iotdb.db.engine.flush.FlushListener;
 import org.apache.iotdb.db.engine.flush.TsFileFlushPolicy;
 import org.apache.iotdb.db.engine.flush.TsFileFlushPolicy.DirectFlushPolicy;
+import org.apache.iotdb.db.engine.migrate.MigrateManager;
 import org.apache.iotdb.db.engine.storagegroup.TsFileProcessor;
 import org.apache.iotdb.db.engine.storagegroup.TsFileResource;
 import org.apache.iotdb.db.engine.storagegroup.VirtualStorageGroupProcessor;
@@ -134,6 +135,7 @@ public class StorageEngine implements IService {
   // add customized listeners here for flush and close events
   private List<CloseFileListener> customCloseFileListeners = new ArrayList<>();
   private List<FlushListener> customFlushListeners = new ArrayList<>();
+  private MigrateManager migrateManager = MigrateManager.getInstance();
 
   private StorageEngine() {}
 
@@ -897,6 +899,41 @@ public class StorageEngine implements IService {
     processorMap.get(storageGroup).setTTL(dataTTL);
   }
 
+  public void setMigrate(PartialPath storageGroup, File targetDir, long ttl, long startTime) {
+    migrateManager.setMigrate(storageGroup, targetDir, ttl, startTime);
+    logger.info("start check migration task successfully.");
+  }
+
+  public void unsetMigrate(long index, PartialPath storageGroup) {
+    if (index != -1) {
+      // unset using index
+      migrateManager.unsetMigrate(index);
+    } else if (storageGroup != null) {
+      // unset using storage group
+      migrateManager.unsetMigrate(storageGroup);
+    }
+  }
+
+  public void pauseMigrate(long index, PartialPath storageGroup) {
+    if (index != -1) {
+      // pause using index
+      migrateManager.pauseMigrate(index);
+    } else if (storageGroup != null) {
+      // pause using storage group
+      migrateManager.pauseMigrate(storageGroup);
+    }
+  }
+
+  public void unpauseMigrate(long index, PartialPath storageGroup) {
+    if (index != -1) {
+      // pause using index
+      migrateManager.unpauseMigrate(index);
+    } else if (storageGroup != null) {
+      // pause using storage group
+      migrateManager.unpauseMigrate(storageGroup);
+    }
+  }
+
   public void deleteStorageGroup(PartialPath storageGroupPath) {
     if (!processorMap.containsKey(storageGroupPath)) {
       return;
@@ -1061,6 +1098,10 @@ public class StorageEngine implements IService {
 
   public Map<PartialPath, StorageGroupManager> getProcessorMap() {
     return processorMap;
+  }
+
+  public MigrateManager getMigrateManager() {
+    return migrateManager;
   }
 
   /**
