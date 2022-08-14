@@ -211,6 +211,7 @@ public class MigrateTest {
     }
     // create a new MigrateTask with specified params
     MigrateTask task = new MigrateTask(0, new PartialPath(sg1), targetDir, 500, 0);
+    task.setStatus(MigrateTask.MigrateTaskStatus.RUNNING);
     virtualStorageGroupProcessor.checkMigrate(task);
 
     // files after migrate
@@ -248,21 +249,13 @@ public class MigrateTest {
     assertEquals(0, unseqFiles.size());
 
     List<File> targetFiles = new ArrayList<>();
-    for (File directory : targetDir.listFiles()) {
-      if (directory.isDirectory()) {
-        for (File file : directory.listFiles()) {
-          if (file.isDirectory()) {
-            for (File tsfile : file.listFiles()) {
-              if (tsfile.getPath().endsWith(TsFileConstant.TSFILE_SUFFIX)) {
-                targetFiles.add(file);
-              }
-            }
-          }
-        }
+    for (File tsfile : targetDir.listFiles()) {
+      if (tsfile.getPath().endsWith(TsFileConstant.TSFILE_SUFFIX)) {
+        targetFiles.add(tsfile);
       }
     }
 
-    assertEquals(targetFiles.size(), 8 - seqFiles.size());
+    assertEquals(8, targetFiles.size() + seqFiles.size() + unseqFiles.size());
   }
 
   @Test
@@ -358,6 +351,7 @@ public class MigrateTest {
     assertEquals(4, virtualStorageGroupProcessor.getUnSequenceFileList().size());
 
     MigrateTask task = new MigrateTask(0, new PartialPath(sg1), targetDir, 0, 0);
+    task.setStatus(MigrateTask.MigrateTaskStatus.RUNNING);
     virtualStorageGroupProcessor.checkMigrate(task);
 
     assertEquals(0, virtualStorageGroupProcessor.getSequenceFileTreeSet().size());
