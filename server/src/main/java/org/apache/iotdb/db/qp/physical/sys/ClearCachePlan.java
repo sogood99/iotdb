@@ -28,7 +28,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 public class ClearCachePlan extends PhysicalPlan {
 
@@ -38,7 +37,6 @@ public class ClearCachePlan extends PhysicalPlan {
 
   @Override
   public List<PartialPath> getPaths() {
-    CompletableFuture
     return Collections.emptyList();
   }
 
