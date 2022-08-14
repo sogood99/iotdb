@@ -39,10 +39,12 @@ public class MigrateLogWriter implements AutoCloseable {
   public MigrateLogWriter(String logFileName) throws FileNotFoundException {
     logFile = SystemFileFactory.INSTANCE.getFile(logFileName);
     if (!logFile.exists()) {
-      if (logFile.getParentFile().mkdirs()) {
-        logger.info("created migrate log folder");
-      } else {
-        logger.info("create migrate log folder failed");
+      if (logFile.getParentFile() != null) {
+        if (logFile.getParentFile().mkdirs()) {
+          logger.info("created migrate log folder");
+        } else {
+          logger.info("create migrate log folder failed");
+        }
       }
     }
     logFileOutStream = new FileOutputStream(logFile, true);
@@ -57,7 +59,7 @@ public class MigrateLogWriter implements AutoCloseable {
     try {
       int type = log.type.ordinal();
       ReadWriteIOUtils.write((byte) type, logFileOutStream);
-      ReadWriteIOUtils.write(log.index, logFileOutStream);
+      ReadWriteIOUtils.write(log.taskId, logFileOutStream);
 
       if (log.type == LogType.SET) {
         ReadWriteIOUtils.write(log.storageGroup.getFullPath(), logFileOutStream);
@@ -74,7 +76,7 @@ public class MigrateLogWriter implements AutoCloseable {
     MigrateLog log =
         new MigrateLog(
             LogType.SET,
-            migrateTask.getIndex(),
+            migrateTask.getTaskId(),
             migrateTask.getStorageGroup(),
             migrateTask.getTargetDir().getPath(),
             migrateTask.getStartTime(),
@@ -83,32 +85,32 @@ public class MigrateLogWriter implements AutoCloseable {
   }
 
   public void startMigrate(MigrateTask migrateTask) throws IOException {
-    MigrateLog log = new MigrateLog(LogType.START, migrateTask.getIndex());
+    MigrateLog log = new MigrateLog(LogType.START, migrateTask.getTaskId());
     putLog(log);
   }
 
   public void finishMigrate(MigrateTask migrateTask) throws IOException {
-    MigrateLog log = new MigrateLog(LogType.FINISHED, migrateTask.getIndex());
+    MigrateLog log = new MigrateLog(LogType.FINISHED, migrateTask.getTaskId());
     putLog(log);
   }
 
   public void unsetMigrate(MigrateTask migrateTask) throws IOException {
-    MigrateLog log = new MigrateLog(LogType.UNSET, migrateTask.getIndex());
+    MigrateLog log = new MigrateLog(LogType.UNSET, migrateTask.getTaskId());
     putLog(log);
   }
 
   public void pauseMigrate(MigrateTask migrateTask) throws IOException {
-    MigrateLog log = new MigrateLog(LogType.PAUSE, migrateTask.getIndex());
+    MigrateLog log = new MigrateLog(LogType.PAUSE, migrateTask.getTaskId());
     putLog(log);
   }
 
   public void unpauseMigrate(MigrateTask migrateTask) throws IOException {
-    MigrateLog log = new MigrateLog(LogType.UNPAUSE, migrateTask.getIndex());
+    MigrateLog log = new MigrateLog(LogType.UNPAUSE, migrateTask.getTaskId());
     putLog(log);
   }
 
   public void error(MigrateTask migrateTask) throws IOException {
-    MigrateLog log = new MigrateLog(LogType.ERROR, migrateTask.getIndex());
+    MigrateLog log = new MigrateLog(LogType.ERROR, migrateTask.getTaskId());
     putLog(log);
   }
 
@@ -119,7 +121,7 @@ public class MigrateLogWriter implements AutoCloseable {
 
   public static class MigrateLog {
     public LogType type;
-    public long index;
+    public long taskId;
     public PartialPath storageGroup;
     public String targetDirPath;
     public long startTime;
@@ -127,20 +129,20 @@ public class MigrateLogWriter implements AutoCloseable {
 
     public MigrateLog() {}
 
-    public MigrateLog(LogType type, long index) {
+    public MigrateLog(LogType type, long taskId) {
       this.type = type;
-      this.index = index;
+      this.taskId = taskId;
     }
 
     public MigrateLog(
         LogType type,
-        long index,
+        long taskId,
         PartialPath storageGroup,
         String targetDirPath,
         long startTime,
         long ttl) {
       this.type = type;
-      this.index = index;
+      this.taskId = taskId;
       this.storageGroup = storageGroup;
       this.targetDirPath = targetDirPath;
       this.startTime = startTime;
@@ -149,7 +151,7 @@ public class MigrateLogWriter implements AutoCloseable {
 
     public MigrateLog(LogType type, MigrateTask task) {
       this.type = type;
-      this.index = task.getIndex();
+      this.taskId = task.getTaskId();
       this.storageGroup = task.getStorageGroup();
       this.targetDirPath = task.getTargetDir().getPath();
       this.startTime = task.getStartTime();

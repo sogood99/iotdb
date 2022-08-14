@@ -7,7 +7,7 @@ import org.apache.iotdb.db.qp.physical.PhysicalPlan;
 import java.util.List;
 
 public class PauseMigratePlan extends PhysicalPlan {
-  private long idx;
+  private long taskId;
   private PartialPath storageGroup;
   private boolean pause = true;
 
@@ -22,9 +22,9 @@ public class PauseMigratePlan extends PhysicalPlan {
     this.pause = pause;
   }
 
-  public PauseMigratePlan(long idx, boolean pause) {
+  public PauseMigratePlan(long taskId, boolean pause) {
     super(Operator.OperatorType.PAUSE_MIGRATE);
-    this.idx = idx;
+    this.taskId = taskId;
     this.pause = pause;
   }
 
@@ -33,8 +33,8 @@ public class PauseMigratePlan extends PhysicalPlan {
     return null;
   }
 
-  public long getIndex() {
-    return idx;
+  public long getTaskId() {
+    return taskId;
   }
 
   public boolean isPause() {

@@ -223,6 +223,7 @@ import static org.apache.iotdb.db.conf.IoTDBConstant.COLUMN_PRIVILEGE;
 import static org.apache.iotdb.db.conf.IoTDBConstant.COLUMN_ROLE;
 import static org.apache.iotdb.db.conf.IoTDBConstant.COLUMN_SCHEMA_TEMPLATE;
 import static org.apache.iotdb.db.conf.IoTDBConstant.COLUMN_STORAGE_GROUP;
+import static org.apache.iotdb.db.conf.IoTDBConstant.COLUMN_TASK_ID;
 import static org.apache.iotdb.db.conf.IoTDBConstant.COLUMN_TIMESERIES_COMPRESSION;
 import static org.apache.iotdb.db.conf.IoTDBConstant.COLUMN_TIMESERIES_DATATYPE;
 import static org.apache.iotdb.db.conf.IoTDBConstant.COLUMN_TIMESERIES_ENCODING;
@@ -1216,7 +1217,7 @@ public class PlanExecutor implements IPlanExecutor {
     ListDataSet listDataSet =
         new ListDataSet(
             Arrays.asList(
-                new PartialPath(COLUMN_INDEX, false),
+                new PartialPath(COLUMN_TASK_ID, false),
                 new PartialPath(COLUMN_STORAGE_GROUP, false),
                 new PartialPath(COLUMN_MIGRATE_STATUS, false),
                 new PartialPath(COLUMN_MIGRATE_START_TIME, false),
@@ -1240,7 +1241,7 @@ public class PlanExecutor implements IPlanExecutor {
         continue;
       }
       RowRecord rowRecord = new RowRecord(timestamp++);
-      Field index = new Field(TSDataType.INT64);
+      Field taskId = new Field(TSDataType.INT64);
       Field sg = new Field(TSDataType.TEXT);
       Field status = new Field(TSDataType.TEXT);
       Field startTime;
@@ -1248,7 +1249,7 @@ public class PlanExecutor implements IPlanExecutor {
       Field targetDir = new Field(TSDataType.TEXT);
 
       // set values for Fields based on tasks
-      index.setLongV(task.getIndex());
+      taskId.setLongV(task.getTaskId());
       sg.setBinaryV(new Binary(sgName.getFullPath()));
       status.setBinaryV(new Binary(task.getStatus().name()));
       targetDir.setBinaryV(new Binary(task.getTargetDir().getPath()));
@@ -1269,7 +1270,7 @@ public class PlanExecutor implements IPlanExecutor {
       }
 
       // add to rowRecord
-      rowRecord.addField(index);
+      rowRecord.addField(taskId);
       rowRecord.addField(sg);
       rowRecord.addField(status);
       rowRecord.addField(startTime);

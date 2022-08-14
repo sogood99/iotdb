@@ -73,13 +73,13 @@ import static org.junit.Assert.fail;
 
 public class MigrateTest {
 
-  private String sg1 = "root.MIGRATE_SG1";
-  private String sg2 = "root.MIGRATE_SG1";
-  private long ttl = 12345;
-  private long startTime = 1672502400000L; // 2023-01-01
+  private final String sg1 = "root.MIGRATE_SG1";
+  private final String sg2 = "root.MIGRATE_SG2";
+  private final long ttl = 12345;
+  private final long startTime = 1672502400000L; // 2023-01-01
   private VirtualStorageGroupProcessor virtualStorageGroupProcessor;
-  private String s1 = "s1";
-  private String g1s1 = sg1 + IoTDBConstant.PATH_SEPARATOR + s1;
+  private final String s1 = "s1";
+  private final String g1s1 = sg1 + IoTDBConstant.PATH_SEPARATOR + s1;
   private long prevPartitionInterval;
   private File targetDir;
 
@@ -89,7 +89,7 @@ public class MigrateTest {
     IoTDBDescriptor.getInstance().getConfig().setPartitionInterval(86400);
     EnvironmentUtils.envSetUp();
     createSchemas();
-    targetDir = new File("./data/separated_test/");
+    targetDir = new File("data", "separated_test");
     targetDir.mkdirs();
   }
 
@@ -108,8 +108,8 @@ public class MigrateTest {
   }
 
   private void createSchemas() throws MetadataException, StorageGroupProcessorException {
-    IoTDB.metaManager.setStorageGroup(new PartialPath(sg1));
-    IoTDB.metaManager.setStorageGroup(new PartialPath(sg2));
+    //    IoTDB.metaManager.setStorageGroup(new PartialPath(sg1));
+    //    IoTDB.metaManager.setStorageGroup(new PartialPath(sg2));
     virtualStorageGroupProcessor =
         new VirtualStorageGroupProcessor(
             IoTDBDescriptor.getInstance().getConfig().getSystemDir(),
@@ -271,11 +271,12 @@ public class MigrateTest {
     SetMigratePlan plan =
         (SetMigratePlan)
             planner.parseSQLToPhysicalPlan(
-                "SET MIGRATION TO " + sg1 + " 2023-01-01 10000 './data/separated'");
+                String.format(
+                    "SET MIGRATION TO " + sg1 + " 2023-01-01 10000 '%s'", targetDir.getPath()));
     assertEquals(sg1, plan.getStorageGroup().getFullPath());
     assertEquals(10000, plan.getTTL());
     assertEquals(1672502400000L, plan.getStartTime());
-    assertEquals(new File("./data/separated"), plan.getTargetDir().getAbsoluteFile());
+    assertEquals(targetDir.getPath(), plan.getTargetDir().getPath());
 
     plan = (SetMigratePlan) planner.parseSQLToPhysicalPlan("UNSET MIGRATION ON " + sg2);
     assertEquals(sg2, plan.getStorageGroup().getFullPath());
@@ -283,7 +284,7 @@ public class MigrateTest {
     assertEquals(Long.MAX_VALUE, plan.getStartTime());
 
     plan = (SetMigratePlan) planner.parseSQLToPhysicalPlan("UNSET MIGRATION 99");
-    assertEquals(99, plan.getIndex());
+    assertEquals(99, plan.getTaskId());
     assertEquals(Long.MAX_VALUE, plan.getTTL());
     assertEquals(Long.MAX_VALUE, plan.getStartTime());
   }
@@ -297,7 +298,7 @@ public class MigrateTest {
     assertTrue(plan.isPause());
 
     plan = (PauseMigratePlan) planner.parseSQLToPhysicalPlan("PAUSE MIGRATION 10");
-    assertEquals(10, plan.getIndex());
+    assertEquals(10, plan.getTaskId());
     assertTrue(plan.isPause());
 
     plan = (PauseMigratePlan) planner.parseSQLToPhysicalPlan("UNPAUSE MIGRATION ON " + sg1);
@@ -305,7 +306,7 @@ public class MigrateTest {
     assertFalse(plan.isPause());
 
     plan = (PauseMigratePlan) planner.parseSQLToPhysicalPlan("UNPAUSE MIGRATION 16");
-    assertEquals(16, plan.getIndex());
+    assertEquals(16, plan.getTaskId());
     assertFalse(plan.isPause());
   }
 
@@ -316,7 +317,7 @@ public class MigrateTest {
     assertTrue(plan.getStorageGroups().isEmpty());
 
     plan = (ShowMigratePlan) planner.parseSQLToPhysicalPlan("SHOW MIGRATION ON " + sg1);
-    assertEquals(sg1, plan.getPath().getFullPath());
+    assertEquals(sg1, plan.getStorageGroups().get(0).getFullPath());
   }
 
   @Test

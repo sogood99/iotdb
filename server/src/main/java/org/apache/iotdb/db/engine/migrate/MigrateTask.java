@@ -23,7 +23,7 @@ import org.apache.iotdb.db.metadata.path.PartialPath;
 import java.io.File;
 
 public class MigrateTask {
-  private long index = -1;
+  private long taskId = -1;
   private PartialPath storageGroup = null;
   private File targetDir = null;
   private long startTime = Long.MAX_VALUE;
@@ -31,8 +31,8 @@ public class MigrateTask {
   private MigrateTaskStatus status = MigrateTaskStatus.READY;
 
   public MigrateTask(
-      long index, PartialPath storageGroup, File targetDir, long ttl, long startTime) {
-    this.index = index;
+      long taskId, PartialPath storageGroup, File targetDir, long ttl, long startTime) {
+    this.taskId = taskId;
     this.storageGroup = storageGroup;
     this.targetDir = targetDir;
     this.ttl = ttl;
@@ -41,8 +41,8 @@ public class MigrateTask {
 
   // getter and setter functions
 
-  public long getIndex() {
-    return index;
+  public long getTaskId() {
+    return taskId;
   }
 
   public PartialPath getStorageGroup() {
@@ -65,8 +65,8 @@ public class MigrateTask {
     return status;
   }
 
-  public void setIndex(long index) {
-    this.index = index;
+  public void setTaskId(long taskId) {
+    this.taskId = taskId;
   }
 
   public void setStorageGroup(PartialPath storageGroup) {

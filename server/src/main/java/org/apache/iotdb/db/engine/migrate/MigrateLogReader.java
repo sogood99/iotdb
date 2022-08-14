@@ -61,7 +61,7 @@ public class MigrateLogReader implements AutoCloseable {
     if (typeNum >= 0 && typeNum < MigrateLogWriter.LogType.values().length)
       log.type = MigrateLogWriter.LogType.values()[typeNum];
     else throw new IOException();
-    log.index = ReadWriteIOUtils.readLong(logFileInStream);
+    log.taskId = ReadWriteIOUtils.readLong(logFileInStream);
 
     if (log.type == MigrateLogWriter.LogType.SET) {
       log.storageGroup = new PartialPath(ReadWriteIOUtils.readString(logFileInStream));

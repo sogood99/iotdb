@@ -9,8 +9,7 @@ import org.apache.iotdb.db.qp.strategy.PhysicalGenerator;
 
 public class PauseMigrateOperator extends Operator {
 
-  // MigrateTask index
-  private long idx = -1;
+  private long taskId = -1;
   private PartialPath storageGroup;
 
   public PauseMigrateOperator(int tokenIntType) {
@@ -18,16 +17,16 @@ public class PauseMigrateOperator extends Operator {
     this.operatorType = OperatorType.PAUSE_MIGRATE;
   }
 
-  public long getIndex() {
-    return idx;
+  public long getTaskId() {
+    return taskId;
   }
 
   public PartialPath getStorageGroup() {
     return storageGroup;
   }
 
-  public void setIndex(long idx) {
-    this.idx = idx;
+  public void setTaskId(long taskId) {
+    this.taskId = taskId;
   }
 
   public void setStorageGroup(PartialPath storageGroup) {
@@ -39,8 +38,8 @@ public class PauseMigrateOperator extends Operator {
       throws QueryProcessException {
     if (storageGroup != null) {
       return new PauseMigratePlan(storageGroup, true);
-    } else if (idx != -1) {
-      return new PauseMigratePlan(idx, true);
+    } else if (taskId != -1) {
+      return new PauseMigratePlan(taskId, true);
     } else {
       return new PauseMigratePlan(true);
     }

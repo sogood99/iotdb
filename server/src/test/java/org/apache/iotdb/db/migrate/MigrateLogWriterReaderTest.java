@@ -43,12 +43,12 @@ import static org.junit.Assert.assertTrue;
 
 public class MigrateLogWriterReaderTest {
 
-  private static String filePath = "logtest.test";
-  private String sg1 = "root.MIGRATE_SG1";
-  private String sg2 = "root.MIGRATE_SG1";
-  private long startTime = 1672502400000L; // 2023-01-01
-  private long ttl = 2000;
-  private String targetDirPath = Paths.get("data", "separated").toString();
+  private static final String filePath = "logtest.test";
+  private final String sg1 = "root.MIGRATE_SG1";
+  private final String sg2 = "root.MIGRATE_SG1";
+  private final long startTime = 1672502400000L; // 2023-01-01
+  private final long ttl = 2000;
+  private final String targetDirPath = Paths.get("data", "separated").toString();
   List<MigrateLogWriter.MigrateLog> migrateLogs;
   MigrateTask task1;
   MigrateTask task2;
@@ -59,7 +59,9 @@ public class MigrateLogWriterReaderTest {
       new File(filePath).delete();
     }
     task1 = new MigrateTask(120, new PartialPath(sg1), new File(targetDirPath), startTime, ttl);
-    task2 = new MigrateTask(999, new PartialPath(sg1), new File(targetDirPath), startTime, ttl);
+    task2 = new MigrateTask(999, new PartialPath(sg2), new File(targetDirPath), startTime, ttl);
+
+    migrateLogs = new ArrayList<>();
     migrateLogs.add(new MigrateLogWriter.MigrateLog(MigrateLogWriter.LogType.START, task1));
     migrateLogs.add(new MigrateLogWriter.MigrateLog(MigrateLogWriter.LogType.SET, task1));
     migrateLogs.add(new MigrateLogWriter.MigrateLog(MigrateLogWriter.LogType.UNSET, task2));
@@ -79,20 +81,24 @@ public class MigrateLogWriterReaderTest {
     if (log1.type != log2.type) {
       return false;
     }
-    if (log1.index != log2.index) {
+    if (log1.taskId != log2.taskId) {
       return false;
     }
-    if (log1.startTime != log2.startTime) {
-      return false;
-    }
-    if (log1.ttl != log2.ttl) {
-      return false;
-    }
-    if (!log1.storageGroup.getFullPath().equals(log2.storageGroup.getFullPath())) {
-      return false;
-    }
-    if (!log1.targetDirPath.equals(log2.targetDirPath)) {
-      return false;
+
+    if (log1.type == MigrateLogWriter.LogType.SET) {
+      // check other fields only if SET
+      if (log1.startTime != log2.startTime) {
+        return false;
+      }
+      if (log1.ttl != log2.ttl) {
+        return false;
+      }
+      if (!log1.storageGroup.getFullPath().equals(log2.storageGroup.getFullPath())) {
+        return false;
+      }
+      if (!log1.targetDirPath.equals(log2.targetDirPath)) {
+        return false;
+      }
     }
 
     return true;

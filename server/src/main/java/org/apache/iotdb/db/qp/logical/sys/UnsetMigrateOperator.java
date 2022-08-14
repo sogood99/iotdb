@@ -31,8 +31,7 @@ public class UnsetMigrateOperator extends Operator {
 
   private PartialPath storageGroup = null;
 
-  // MigrateTask index
-  private long idx = -1;
+  private long taskId = -1;
 
   public UnsetMigrateOperator(int tokenIntType) {
     super(tokenIntType);
@@ -47,12 +46,12 @@ public class UnsetMigrateOperator extends Operator {
     this.storageGroup = storageGroup;
   }
 
-  public long getIndex() {
-    return idx;
+  public long getTaskId() {
+    return taskId;
   }
 
-  public void setIndex(long idx) {
-    this.idx = idx;
+  public void setTaskId(long taskId) {
+    this.taskId = taskId;
   }
 
   @Override
@@ -60,8 +59,8 @@ public class UnsetMigrateOperator extends Operator {
       throws QueryProcessException {
     if (storageGroup != null) {
       return new SetMigratePlan(storageGroup);
-    } else if (idx != -1) {
-      return new SetMigratePlan(idx);
+    } else if (taskId != -1) {
+      return new SetMigratePlan(taskId);
     } else {
       return new SetMigratePlan();
     }

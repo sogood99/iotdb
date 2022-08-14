@@ -97,36 +97,36 @@ public class MigrateManager {
         switch (log.type) {
           case SET:
             setMigrateFromLog(
-                log.index,
+                log.taskId,
                 log.storageGroup,
                 FSFactoryProducer.getFSFactory().getFile(log.targetDirPath),
                 log.ttl,
                 log.startTime);
             break;
           case UNSET:
-            unsetMigrateFromLog(log.index);
+            unsetMigrateFromLog(log.taskId);
             break;
           case START:
             // if task started but didn't finish, then error occurred
-            errorSet.add(log.index);
+            errorSet.add(log.taskId);
             break;
           case PAUSE:
-            errorSet.remove(log.index);
-            pauseMigrateFromLog(log.index);
+            errorSet.remove(log.taskId);
+            pauseMigrateFromLog(log.taskId);
             break;
           case UNPAUSE:
-            unpauseMigrateFromLog(log.index);
+            unpauseMigrateFromLog(log.taskId);
             break;
           case FINISHED:
             // finished task => remove from list and remove from potential error task
-            errorSet.remove(log.index);
-            migrateTasks.remove(log.index);
-            finishFromLog(log.index);
+            errorSet.remove(log.taskId);
+            migrateTasks.remove(log.taskId);
+            finishFromLog(log.taskId);
             break;
           case ERROR:
             // already put error in log
-            errorSet.remove(log.index);
-            errorFromLog(log.index);
+            errorSet.remove(log.taskId);
+            errorFromLog(log.taskId);
             break;
           default:
             logger.error("read migrate log: unknown type");
@@ -198,7 +198,7 @@ public class MigrateManager {
   public boolean unsetMigrate(long removeIndex) {
     if (migrateTasks.containsKey(removeIndex)) {
       MigrateTask task = migrateTasks.get(removeIndex);
-      if (task.getIndex() == removeIndex
+      if (task.getTaskId() == removeIndex
           && (task.getStatus() == MigrateTask.MigrateTaskStatus.READY
               || task.getStatus() == MigrateTask.MigrateTaskStatus.RUNNING)) {
         // write to log

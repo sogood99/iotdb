@@ -779,8 +779,8 @@ public class IoTDBSqlVisitor extends IoTDBSqlParserBaseVisitor<Operator> {
     UnsetMigrateOperator operator = new UnsetMigrateOperator(SQLConstant.TOK_UNSET);
     if (ctx.storageGroup != null) {
       operator.setStorageGroup(parsePrefixPath(ctx.storageGroup));
-    } else if (ctx.index != null) {
-      operator.setIndex(Long.parseLong(ctx.index.getText()));
+    } else if (ctx.taskId != null) {
+      operator.setTaskId(Long.parseLong(ctx.taskId.getText()));
     } else {
       // unknown case
       throw new SQLParserException("unset migration unknown case");
@@ -794,8 +794,8 @@ public class IoTDBSqlVisitor extends IoTDBSqlParserBaseVisitor<Operator> {
     PauseMigrateOperator operator = new PauseMigrateOperator(SQLConstant.TOK_SET);
     if (ctx.storageGroup != null) {
       operator.setStorageGroup(parsePrefixPath(ctx.storageGroup));
-    } else if (ctx.index != null) {
-      operator.setIndex(Long.parseLong(ctx.index.getText()));
+    } else if (ctx.taskId != null) {
+      operator.setTaskId(Long.parseLong(ctx.taskId.getText()));
     } else {
       // unknown case
       throw new SQLParserException("pause migration unknown case");
@@ -809,8 +809,8 @@ public class IoTDBSqlVisitor extends IoTDBSqlParserBaseVisitor<Operator> {
     UnpauseMigrateOperator operator = new UnpauseMigrateOperator(SQLConstant.TOK_UNSET);
     if (ctx.storageGroup != null) {
       operator.setStorageGroup(parsePrefixPath(ctx.storageGroup));
-    } else if (ctx.index != null) {
-      operator.setIndex(Long.parseLong(ctx.index.getText()));
+    } else if (ctx.taskId != null) {
+      operator.setTaskId(Long.parseLong(ctx.taskId.getText()));
     } else {
       // unknown case
       throw new SQLParserException("unpause migration unknown case");
