@@ -105,11 +105,10 @@ public class MigrateTest {
       }
     }
     targetDir.delete();
+    targetDir.getParentFile().delete();
   }
 
   private void createSchemas() throws MetadataException, StorageGroupProcessorException {
-    //    IoTDB.metaManager.setStorageGroup(new PartialPath(sg1));
-    //    IoTDB.metaManager.setStorageGroup(new PartialPath(sg2));
     virtualStorageGroupProcessor =
         new VirtualStorageGroupProcessor(
             IoTDBDescriptor.getInstance().getConfig().getSystemDir(),

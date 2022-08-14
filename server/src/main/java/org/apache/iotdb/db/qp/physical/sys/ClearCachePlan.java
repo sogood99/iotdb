@@ -37,6 +37,7 @@ public class ClearCachePlan extends PhysicalPlan {
 
   @Override
   public List<PartialPath> getPaths() {
+    //    CompletableFuture
     return Collections.emptyList();
   }
 

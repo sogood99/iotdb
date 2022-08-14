@@ -964,6 +964,34 @@ public class IoTDBConfig {
     this.timeIndexLevel = TimeIndexLevel.valueOf(timeIndexLevel);
   }
 
+  public void setWalBufferSize(int walBufferSize) {
+    this.walBufferSize = walBufferSize;
+  }
+
+  public void setEnableLastCache(boolean lastCacheEnable) {
+    this.lastCacheEnable = lastCacheEnable;
+  }
+
+  public void setEnableSeqSpaceCompaction(boolean enableSeqSpaceCompaction) {
+    this.enableSeqSpaceCompaction = enableSeqSpaceCompaction;
+  }
+
+  public void setEnableUnseqSpaceCompaction(boolean enableUnseqSpaceCompaction) {
+    this.enableUnseqSpaceCompaction = enableUnseqSpaceCompaction;
+  }
+
+  public void setEnableCrossSpaceCompaction(boolean enableCrossSpaceCompaction) {
+    this.enableCrossSpaceCompaction = enableCrossSpaceCompaction;
+  }
+
+  public void setEnableTimedFlushUnseqMemtable(boolean enableTimedFlushUnseqMemtable) {
+    this.enableTimedFlushUnseqMemtable = enableTimedFlushUnseqMemtable;
+  }
+
+  public void setEnableTimedCloseTsFile(boolean enableTimedCloseTsFile) {
+    this.enableTimedCloseTsFile = enableTimedCloseTsFile;
+  }
+
   void updatePath() {
     formulateFolders();
     confirmMultiDirStrategy();
